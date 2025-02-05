@@ -1,0 +1,158 @@
+[
+  // format data tablelist
+  {
+    "name": "mpr",
+    "title": "MPR Overview",
+    "url_root": "/d",
+    "apix": {
+      "port": "recruitment",
+      "value": "data.data.mp_request_header",
+      "path": "/api/mp-requests",
+      "validate": "array"
+    },
+    "column": [
+      ["id_applicant", "ID Applicant"],
+      ["applicant_name", "Applicant Name"],
+      ["gpa", "GPA"],
+      ["major", "Major"],
+      ["job_name", "Job Name"],
+      ["job_experience", "Job Experience"],
+      ["work_experience", "Work Experience (month)"],
+      ["cv", "CV"],
+      ["status_selection", "Status Selection", "status"]
+    ]
+  },
+  // FORM NEW
+  {
+    "mode": "new",
+    "name": "offering-letter-document",
+    "title": "Offering Letter Document",
+    "url_root": "/d/offering-letter",
+    "apix": {
+      "port": "recruitment",
+      "value": "data.data",
+      "path": "/api/final-interview-result",
+      "validate": "object"
+    },
+    "field": [
+      ["document_number", "Document Number", "text"], // disabled
+      ["document_date", "Document Date", "date"],
+      [
+        "job_posting_id",
+        "Job Name",
+        "dropdown",
+        {
+          "apix": {
+            "port": "recruitment",
+            "value": "data.data.job_postings",
+            "path": "/api/job-postings?status=IN PROGRESS",
+            "keys": {
+              "label": "job_name"
+            },
+            "validate": "dropdown"
+          }
+        }
+      ],
+
+      [
+        "recruitment_type",
+        "Recruitment Type",
+        "dropdown",
+        {
+          "apix": {
+            "port": "recruitment",
+            "value": "data.data",
+            "path": "/api/recruitment-types",
+            "keys": {
+              "value": "value",
+              "label": "value"
+            },
+            "validate": "dropdown"
+          }
+        }
+      ],
+      ["project_number", "Project Number", "text"],
+      [
+        "organization_name",
+        "Organization Name",
+        "dropdown",
+        {
+          "apix": {
+            "port": "portal",
+            "value": "data.data.organizations",
+            "path": "/api/organizations",
+            "keys": {
+              "label": "name"
+            },
+            "validate": "dropdown"
+          }
+        }
+      ],
+      [
+        "project_recruitment_line_id",
+        "Activity",
+        "dropdown",
+        {
+          "apix": {
+            "port": "recruitment",
+            "value": "data.data",
+            "path": "/api/project-recruitment-lines/header/",
+            "keys": {
+              "label": "name"
+            },
+            "validate": "dropdown"
+          }
+        }
+      ],
+      [
+        "document_setup_id",
+        "Document Type",
+        "dropdown",
+        {
+          "apix": {
+            "port": "recruitment",
+            "value": "data.data.document_setups",
+            "path": "/api/document-setup",
+            "keys": {
+              "label": "name"
+            },
+            "validate": "dropdown"
+          }
+        }
+      ],
+      ["status", "Status", "text"]
+    ]
+  },
+
+  // FORM EDIT
+  {
+    "mode": "edit",
+    "name": "result-interview",
+    "title": "Result Interview",
+    "url_root": "/d/interview",
+    "apix": {
+      "port": "recruitment",
+      "value": "data.data",
+      "path": "/api/job-postings",
+      "validate": "object"
+    },
+    "onload": {
+      "apix": {
+        "port": "recruitment",
+        "value": "data.data",
+        "path": "/api/job-postings",
+        "validate": "object"
+      }
+    },
+    // default tipe fieldnya text
+    // jika tipe fieldnya richtext maka col-span-2
+
+    "field": [
+      ["name", "Name", "text"], //  disabled
+      ["interview_date", "Interview Date", "date"], //  disabled
+      ["job_name", "Job Name", "text"], //  disabled
+      ["description", "Description", "textarea"], //  disabled
+      ["interviewer_name", "Interviewer Name", "text"] //  disabled
+    ]
+  }
+]
