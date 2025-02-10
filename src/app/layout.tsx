@@ -27,23 +27,30 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     ready: false,
   });
   const routerInstance = useRouter();
+
   useEffect(() => {
     const run = async () => {
+      let isUser = false;
       try {
-        await userToken();
+        isUser = await userToken();
       } catch (ex) {}
-      try {
-        const roles = await userRoleMe();
-        globalThis.userRole = roles;
-      } catch (ex) {}
-      globalThis.router = routerInstance;
-      const user = localStorage.getItem("user");
-      if (user) {
-        const w = window as any;
-        w.user = JSON.parse(user);
+      if (!isUser) {
+        local.ready = true;
+        local.render();
+      } else {
+        try {
+          const roles = await userRoleMe();
+          globalThis.userRole = roles;
+        } catch (ex) {}
+        globalThis.router = routerInstance;
+        const user = localStorage.getItem("user");
+        if (user) {
+          const w = window as any;
+          w.user = JSON.parse(user);
+        }
+        local.ready = true;
+        local.render();
       }
-      local.ready = true;
-      local.render();
     };
     run();
   }, []);
@@ -51,7 +58,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
     <html lang="en">
       <head>
-        <Header title="MPP" />
+        <Header title="On Boarding" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
