@@ -10,9 +10,11 @@ import { PaginationPage } from "@/lib/components/tablelist/TableList";
 import get from "lodash.get";
 import { ButtonBetter } from "@/lib/components/ui/button";
 import { HiPlus } from "react-icons/hi";
+import { ModalPageTemplateTask } from "@/app/components/ModalPageTemplateTask";
 
 function Page() {
   const [isClient, setIsClient] = useState(false);
+  const [open, setOpen] = useState(false);
   const local = useLocal({
     open: false,
     ready: false,
@@ -64,12 +66,18 @@ function Page() {
   useEffect(() => {}, []);
   return (
     <div className="flex flex-col flex-grow">
+      <ModalPageTemplateTask
+        open={open}
+        onChangeOpen={(e) => {
+          setOpen(e);
+        }}
+      />
       <div className="w-full p-4 py-6 pr-6 pl-3 ">
         <div className="flex flex-row  text-2xl font-bold">Task Template</div>
       </div>
       <div className="w-full p-4 py-6 pr-6 pl-3 flex flex-row">
         <div className="flex flex-grow">
-          <ButtonBetter>
+          <ButtonBetter onClick={() => setOpen(true)}>
             <HiPlus className="text-xl" />
             Add New
           </ButtonBetter>
@@ -77,7 +85,7 @@ function Page() {
         <div className="flex flex-grow"></div>
       </div>
       <div className="flex flex-col flex-grow">
-        <div className="flex flex-grow pb-4 justify-center">
+        <div className="flex flex-grow pb-4 justify-start">
           <div className="flex ">
             <PinterestLayout
               gap={4}
