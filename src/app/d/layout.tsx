@@ -19,6 +19,7 @@ interface RootLayoutProps {
 const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const [mini, setMini] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [currentPage, setCurrentPage] = useState("");
 
   const local = useLocal({
     user: null as any,
@@ -27,6 +28,11 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
   });
   useEffect(() => {
     setIsClient(true);
+    if (typeof location === "object") {
+      const newPage = window.location.pathname;
+      console.log(newPage);
+      setCurrentPage(newPage);
+    }
     const localMini = localStorage.getItem("mini");
     if (!localMini) {
       localStorage.setItem("mini", mini ? "true" : "false");
@@ -138,18 +144,29 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
           )}
         </div>
       </div>
-      <div className="flex  bg-layer flex-grow flex-col py-3">
-        <div className="flex flex-row flex-grow  flex-grow">
-          <div
-            id="main-content"
-            className="flex-grow  relative overflow-y-auto flex flex-row"
-          >
-            <div className="w-full h-full absolute top-0 lef-0 flex flex-row  p-4 pb-0 pt-0 pr-6 pl-3">
-              {isClient ? (
-                <main className="flex-grow flex flex-col">{children}</main>
-              ) : (
-                <>Loading</>
-              )}
+      <div className="flex  bg-layer flex-grow flex-col">
+        <div
+          className={cx(
+            "flex flex-col flex-grow  flex-grow py-3  bg-cover bg-no-repeat	 bg-right-bottom",
+            currentPage === "/d/dashboard"
+              ? css`
+                  background-image: url("${siteurl("/bg-circle.png")}");
+                `
+              : ``
+          )}
+        >
+          <div className="flex flex-row flex-grow  flex-grow">
+            <div
+              id="main-content"
+              className="flex-grow  relative overflow-y-auto flex flex-row"
+            >
+              <div className="w-full h-full absolute top-0 lef-0 flex flex-row  p-4 pb-0 pt-0 pr-6 pl-3">
+                {isClient ? (
+                  <main className="flex-grow flex flex-col">{children}</main>
+                ) : (
+                  <>Loading</>
+                )}
+              </div>
             </div>
           </div>
         </div>

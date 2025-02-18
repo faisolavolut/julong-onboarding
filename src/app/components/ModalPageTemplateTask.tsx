@@ -47,12 +47,7 @@ export const ModalPageTemplateTask: FC<{
       />
       <Dialog open={open}>
         <DialogContent
-          className={cx(
-            " flex flex-col w-screen h-screen",
-            css`
-              max-width: 100vw;
-            `
-          )}
+          className={cx(" flex flex-col w-screen h-screen max-w-screen")}
           onClick={() => {
             onChangeOpen(false);
           }}
