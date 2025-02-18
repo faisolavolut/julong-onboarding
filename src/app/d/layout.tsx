@@ -30,7 +30,6 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
     setIsClient(true);
     if (typeof location === "object") {
       const newPage = window.location.pathname;
-      console.log(newPage);
       setCurrentPage(newPage);
     }
     const localMini = localStorage.getItem("mini");
@@ -147,12 +146,7 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
       <div className="flex  bg-layer flex-grow flex-col">
         <div
           className={cx(
-            "flex flex-col flex-grow  flex-grow py-3  bg-cover bg-no-repeat	 bg-right-bottom",
-            currentPage === "/d/dashboard"
-              ? css`
-                  background-image: url("${siteurl("/bg-circle.png")}");
-                `
-              : ``
+            "flex flex-col flex-grow  flex-grow  bg-cover bg-no-repeat	 bg-right-bottom"
           )}
         >
           <div className="flex flex-row flex-grow  flex-grow">
@@ -160,7 +154,7 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
               id="main-content"
               className="flex-grow  relative overflow-y-auto flex flex-row"
             >
-              <div className="w-full h-full absolute top-0 lef-0 flex flex-row  p-4 pb-0 pt-0 pr-6 pl-3">
+              <div className="w-full h-full absolute top-0 lef-0 flex flex-row ">
                 {isClient ? (
                   <main className="flex-grow flex flex-col">{children}</main>
                 ) : (

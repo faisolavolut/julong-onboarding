@@ -78,7 +78,7 @@ function Page() {
                   ></div>
                 </div>{" "}
                 <h2 className="text-lg font-bold mt-4">Account</h2>
-                <div className="flex flex-col relative text-md">
+                <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Username</p>
                     <p className="text-gray-800 font-bold">Mihyla2819</p>
@@ -97,7 +97,7 @@ function Page() {
             <CardBetter className="  p-4 flex flex-col  flex-grow">
               <div className="flex flex-col flex-grow gap-y-2">
                 <h2 className="text-lg font-bold mt-4">Status</h2>
-                <div className="flex flex-col relative text-md">
+                <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Organization</p>
                     <p className="text-gray-800 font-bold">Organization</p>
@@ -118,7 +118,7 @@ function Page() {
             <CardBetter className="  p-4 flex flex-col  flex-grow">
               <div className="flex flex-col flex-grow gap-y-2">
                 <h2 className="text-lg font-bold mt-4">My Profile</h2>
-                <div className="flex flex-col relative text-md">
+                <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Name</p>
                     <p className="text-gray-800 font-bold">Mihyla Sudin</p>

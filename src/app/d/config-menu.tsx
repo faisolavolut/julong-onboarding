@@ -3,9 +3,9 @@ import { MdOutlineEventAvailable, MdOutlineTaskAlt } from "react-icons/md";
 
 export const configMenu = [
   {
-    title: "Dashboard",
+    title: "Home",
     icon: <FaChartSimple />,
-    href: "/d/dashboard",
+    href: "/d/home",
     permision: ["read-dashboard-onboarding"],
   },
   {
