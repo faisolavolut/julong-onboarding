@@ -72,7 +72,7 @@ function Page() {
                     className={cx(
                       "flex flex-grow bg-cover bg-no-repeat	 bg-center mx-auto max-w-80",
                       css`
-                        background-image: url("${siteurl("/dog.jpg")}");
+                        background-image: url("${siteurl("/bean.webp")}");
                       `
                     )}
                   ></div>

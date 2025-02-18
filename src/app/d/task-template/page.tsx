@@ -93,7 +93,7 @@ function Page() {
               child={(item, idx, data, key) => {
                 return <JobCard data={item} />;
               }}
-              col={4}
+              col={3}
             />
           </div>
         </div>

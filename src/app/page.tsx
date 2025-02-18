@@ -14,7 +14,7 @@ function HomePage() {
   });
   useEffect(() => {
     const run = async () => {
-      navigate("/d/dashboard");
+      navigate("/d/home");
     };
     run();
   }, []);
@@ -23,7 +23,7 @@ function HomePage() {
   }
   return (
     <div className="flex flex-col max-w-screen bg-white">
-      Direct to <Link href="/d/dashboard">Dashboard</Link>
+      Direct to <Link href="/d/home">Dashboard</Link>
     </div>
   );
 }

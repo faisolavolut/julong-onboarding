@@ -16,7 +16,7 @@ export const JobCard: React.FC<any> = ({
     setTimeout(() => setIsZooming(false), 300); // Durasi animasi 300ms
   };
   return (
-    <div className="border rounded-lg overflow-hidden shadow-md  w-72 bg-white">
+    <div className="border rounded-lg overflow-hidden shadow-md  w-full bg-white">
       <div className="flex justify-between items-center">
         <div className="w-full h-28">
           <img
