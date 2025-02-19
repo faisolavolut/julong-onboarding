@@ -1,5 +1,7 @@
 "use client";
 import { CardBetter } from "@/lib/components/ui/card";
+import ImageBetter from "@/lib/components/ui/Image";
+import { get_user } from "@/lib/utils/get_user";
 import { getAccess, userRoleMe } from "@/lib/utils/getAccess";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
@@ -63,20 +65,30 @@ function Page() {
   return (
     <div className="flex p-4 flex-col flex-grow gap-y-2 max-w-5xl ">
       <div className="flex flex-row flex-grow gap-y-4 items-start">
-        <div className=" col-span-3 flex-grow grid grid-cols-3 gap-4">
-          <div className="flex flex-col flex-grow col-span-2 row-span-2">
+        <div className="col-span-3 flex-grow grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex flex-col flex-grow md:col-span-2 row-span-2">
             <CardBetter className="col-span-2   p-4 flex flex-col h-full w-full">
               <div className="flex flex-col flex-grow gap-y-2">
                 <div className="flex flex-row  justify-center flex-grow max-h-96	">
-                  <div
+                  {/* <div
                     className={cx(
                       "flex flex-grow bg-cover bg-no-repeat	 bg-center mx-auto max-w-80",
                       css`
                         background-image: url("${siteurl("/bean.webp")}");
                       `
                     )}
-                  ></div>
-                </div>{" "}
+                  ></div> */}
+                  <ImageBetter
+                    src={siteurl(
+                      get_user("profile.avatar")
+                        ? get_user("profile.avatar")
+                        : get_user("photo")
+                    )}
+                    alt="Profile"
+                    className="sm:w-48 sm:h-48 md:h-64 md:w-64 rounded-full object-cover"
+                    defaultSrc={siteurl("/bean.webp")}
+                  />
+                </div>
                 <h2 className="text-lg font-bold mt-4">Account</h2>
                 <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">

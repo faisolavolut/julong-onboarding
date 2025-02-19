@@ -68,7 +68,6 @@ function Page() {
         <ListUI
           name="todo"
           title={({ ui, count }: any) => {
-            console.log(formatMoney(getNumber(count)));
             return (
               <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#9EADD8] text-white font-medium shadow-md">
                 <div className="flex items-center gap-2">
