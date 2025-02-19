@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/lib/components/ui/dialog";
 import { ScrollArea } from "@/lib/components/ui/scroll-area";
-import { apix } from "@/lib/utils/apix";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
 import { FC, useState } from "react";
@@ -61,7 +60,10 @@ export const ModalPageTemplateTask: FC<{
               <Form
                 onSubmit={async (fm: any) => {}}
                 onLoad={async () => {
-                  return {};
+                  return {
+                    priority: "high",
+                    status: "active",
+                  };
                 }}
                 showResize={false}
                 header={(fm: any) => {
@@ -148,9 +150,12 @@ export const ModalPageTemplateTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
-                                name={"due_date"}
+                                name={"due_duration"}
                                 label={"Due Date"}
-                                type={"date"}
+                                type={"money"}
+                                suffix={() => (
+                                  <div className="text-sm px-2">Day</div>
+                                )}
                               />
                             </div>
                             <div>
@@ -160,15 +165,6 @@ export const ModalPageTemplateTask: FC<{
                                 label={"Priority"}
                                 type={"dropdown"}
                                 onLoad={async () => {
-                                  const res: any = await apix({
-                                    port: "recruitment",
-                                    value: "data.data.template_questions",
-                                    path: "/api/template-questions",
-                                    validate: "dropdown",
-                                    keys: {
-                                      label: "name",
-                                    },
-                                  });
                                   return [
                                     {
                                       label: "High",
@@ -196,16 +192,12 @@ export const ModalPageTemplateTask: FC<{
                                 onLoad={async () => {
                                   return [
                                     {
-                                      label: "High",
-                                      value: "high",
+                                      label: "Active",
+                                      value: "active",
                                     },
                                     {
-                                      label: "Medium",
-                                      value: "medium",
-                                    },
-                                    {
-                                      label: "Low",
-                                      value: "low",
+                                      label: "Inactive",
+                                      value: "inactive",
                                     },
                                   ];
                                 }}
@@ -235,11 +227,12 @@ export const ModalPageTemplateTask: FC<{
                               onClick={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                const data = fm?.data?.template_question || [];
+                                const data =
+                                  fm?.data?.template_task_checklists || [];
                                 data.push({});
-                                fm.data.template_question = data;
+                                fm.data.template_task_checklists = data;
                                 fm.render();
-                                console.log(fm.data.template_question);
+                                console.log(fm.data.template_task_checklists);
                               }}
                             >
                               <HiPlus className="text-xl" />
@@ -248,10 +241,10 @@ export const ModalPageTemplateTask: FC<{
                           </div>
                         </div>
 
-                        <div className={cx("w-full flex flex-col gap-y-2")}>
-                          {fm?.data?.template_question?.length ? (
-                            <>
-                              {fm?.data?.template_question.map(
+                        {fm?.data?.template_task_checklists?.length ? (
+                          <>
+                            <div className={cx("w-full flex flex-col gap-y-2")}>
+                              {fm?.data?.template_task_checklists.map(
                                 (e: any, idx: number) => {
                                   let fm_row = cloneFM(fm, e);
                                   return (
@@ -281,11 +274,11 @@ export const ModalPageTemplateTask: FC<{
                                   );
                                 }
                               )}
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                         <div
                           className={cx(
                             "w-full flex flex-row border-b border-gray-300 pb-1"
@@ -314,6 +307,12 @@ export const ModalPageTemplateTask: FC<{
                         </div>
 
                         <div className="flex items-center justify-center w-full">
+                          <Field
+                            fm={fm}
+                            name={"attachments"}
+                            label={"Description"}
+                            type={"multi-upload"}
+                          />
                           <label
                             htmlFor="dropzone-file"
                             className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
