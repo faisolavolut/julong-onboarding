@@ -19,27 +19,20 @@ interface RootLayoutProps {
 const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const [mini, setMini] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [currentPage, setCurrentPage] = useState("");
 
   const local = useLocal({
     user: null as any,
-    data: configMenu,
+    data: [] as any[],
     ready: false,
   });
   useEffect(() => {
     setIsClient(true);
-    if (typeof location === "object") {
-      const newPage = window.location.pathname;
-      setCurrentPage(newPage);
-    }
     const localMini = localStorage.getItem("mini");
     if (!localMini) {
       localStorage.setItem("mini", mini ? "true" : "false");
     } else {
       setMini(localMini === "true" ? true : false);
     }
-    local.ready = true;
-    local.render();
     const run = async () => {
       try {
         const user = await api.get(
@@ -63,6 +56,7 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
         navigate(`${process.env.NEXT_PUBLIC_API_PORTAL}/login`);
       }
     };
+    run();
   }, []);
 
   return (

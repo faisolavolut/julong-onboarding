@@ -3,14 +3,20 @@ import { apix } from "@/lib/utils/apix";
 import { getAccess, userRoleMe } from "@/lib/utils/getAccess";
 import { getNumber } from "@/lib/utils/getNumber";
 import { useLocal } from "@/lib/utils/use-local";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BreadcrumbBetterLink } from "@/lib/components/ui/breadcrumb-link";
 import { events } from "@/lib/utils/event";
 import JobCard from "@/app/components/JobCard";
 import { ListUI } from "@/lib/components/list/ListUI";
 import { formatMoney } from "@/lib/components/form/field/TypeInput";
+import { ButtonBetter } from "@/lib/components/ui/button";
+import { HiPlus } from "react-icons/hi";
+import { ModalPageEditorTask } from "@/app/components/ModalPageEditorTask";
+import { ModalPageTask } from "@/app/components/ModalPageTask";
 
 function Page() {
+  const [open, setOpen] = useState(false);
+  const [opentask, setOpenTask] = useState(false);
   const local = useLocal({
     can_add: false,
     can_edit: false,
@@ -49,20 +55,45 @@ function Page() {
 
   return (
     <div className="flex flex-col flex-grow">
-      <div className="w-full p-4 py-6 pr-6 pl-3 ">
-        <div className="flex flex-row  text-2xl font-bold">Progress Task</div>
-        <BreadcrumbBetterLink
-          data={[
-            {
-              title: "List Job Posting",
-              url: "/d/interview/result-interview",
-            },
-            {
-              title: "List Applicant",
-              // url: "/d/interview/result-interview/" + id_posting,
-            },
-          ]}
+      <div className="flex flex-row items-center w-full">
+        <div className="w-full p-4 py-6 pr-6 pl-3 ">
+          <div className="flex flex-row  text-2xl font-bold">Progress Task</div>
+          <BreadcrumbBetterLink
+            data={[
+              {
+                title: "List Job Posting",
+                url: "/d/interview/result-interview",
+              },
+              {
+                title: "List Applicant",
+                // url: "/d/interview/result-interview/" + id_posting,
+              },
+            ]}
+          />
+        </div>
+        <ModalPageEditorTask
+          open={open}
+          onChangeOpen={(e) => {
+            setOpen(e);
+          }}
         />
+        <ModalPageTask
+          open={opentask}
+          onChangeOpen={(e) => {
+            setOpenTask(e);
+          }}
+          onLoad={async () => {
+            return {};
+          }}
+          onSubmit={async (fm) => {}}
+          afterLoad={async (fm) => {}}
+        />
+        <div className="flex flex-grow flex-row justify-end items-center">
+          <ButtonBetter onClick={() => setOpen(true)}>
+            <HiPlus className="text-xl" />
+            Add New
+          </ButtonBetter>
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-4 flex-grow pb-3">
         <ListUI
@@ -89,7 +120,12 @@ function Page() {
           content={({ item }: any) => {
             return (
               <>
-                <JobCard data={item} />
+                <JobCard
+                  data={item}
+                  onClick={(item) => {
+                    setOpenTask(true);
+                  }}
+                />
               </>
             );
           }}
@@ -116,7 +152,6 @@ function Page() {
         <ListUI
           name="in_progress"
           title={({ ui, count }: any) => {
-            console.log(formatMoney(getNumber(count)));
             return (
               <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#7C94CD] text-white font-medium shadow-md">
                 <div className="flex items-center gap-2">
@@ -138,7 +173,12 @@ function Page() {
           content={({ item }: any) => {
             return (
               <>
-                <JobCard data={item} />
+                <JobCard
+                  data={item}
+                  onClick={(item) => {
+                    setOpenTask(true);
+                  }}
+                />
               </>
             );
           }}
@@ -165,7 +205,6 @@ function Page() {
         <ListUI
           name="need_review"
           title={({ ui, count }: any) => {
-            console.log(formatMoney(getNumber(count)));
             return (
               <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#4C5EA2] text-white font-medium shadow-md">
                 <div className="flex items-center gap-2">
@@ -187,7 +226,12 @@ function Page() {
           content={({ item }: any) => {
             return (
               <>
-                <JobCard data={item} />
+                <JobCard
+                  data={item}
+                  onClick={(item) => {
+                    setOpenTask(true);
+                  }}
+                />
               </>
             );
           }}
@@ -214,7 +258,6 @@ function Page() {
         <ListUI
           name="completed"
           title={({ ui, count }: any) => {
-            console.log(formatMoney(getNumber(count)));
             return (
               <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-primary text-white font-medium shadow-md">
                 <div className="flex items-center gap-2">
@@ -236,7 +279,12 @@ function Page() {
           content={({ item }: any) => {
             return (
               <>
-                <JobCard data={item} />
+                <JobCard
+                  data={item}
+                  onClick={(item) => {
+                    setOpenTask(true);
+                  }}
+                />
               </>
             );
           }}
