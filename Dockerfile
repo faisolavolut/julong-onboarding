@@ -6,19 +6,19 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y git && apt-get clean
 
 RUN git clone https://github.com/faisolavolut/julong-lib.git src/lib
-# Set working directory to the cloned repo
-WORKDIR /app/src/lib
 
-# Install dependencies
-RUN npm install
-
-# Set back to main working directory
-WORKDIR /app
 
 COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm install
 
+# Set working directory to the cloned repo
+WORKDIR /app/src/lib
+
+# Install dependencies
+RUN npm install
+# Set back to main working directory
+WORKDIR /app
 # Stage 2: Build aplikasi
 FROM node:22-slim AS builder
 WORKDIR /app
