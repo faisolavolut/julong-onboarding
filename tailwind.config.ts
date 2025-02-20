@@ -38,6 +38,8 @@ export default {
           "linear-gradient(90deg, rgba(62,62,97,1) 0%, rgba(46,46,72,1) 100%)",
         "linear-primary":
           "linear-gradient(90deg, rgba(62,62,97,1) 0%, rgba(46,46,72,1) 100%)",
+        "linear-progress":
+          "linear-gradient(90deg, rgba(49,54,120,1) 0%, rgba(91,100,222,1) 100%)",
       },
       fontFamily: {
         body: [

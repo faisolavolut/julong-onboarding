@@ -1,7 +1,10 @@
 import ImageBetter from "@/lib/components/ui/Image";
+import { Progress } from "@/lib/components/ui/Progress";
+import { dayDate } from "@/lib/utils/date";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useState } from "react";
-export const JobCard: React.FC<{
+import { LuCalendarDays } from "react-icons/lu";
+export const TaskCard: React.FC<{
   data: any;
   hidden_save?: boolean;
   render?: () => void;
@@ -33,20 +36,32 @@ export const JobCard: React.FC<{
         </div>
       </div>
       <div className="flex flex-col p-4">
-        <h2 className=" font-bold text-lg">{data?.name}</h2>
-        <div className="flex flex-grow items-center justify-end">
-          <p
-            className={cx(
-              "font-bold text-xs line-clamp-1",
-              data?.status === "ACTIVE" ? "text-blue-500" : "text-red-500"
-            )}
-          >
-            {data?.status === "ACTIVE" ? "Active" : "Inactive"}
-          </p>
+        <div className="flex flex-row gap-x-1">
+          <h2 className=" font-bold text-lg flex-grow">{data?.name}</h2>
+          <div className="flex items-center justify-end">
+            <div className="bg-amber-300	text-amber-600 p-1 text-xs rounded-md">
+              Medium
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col relative">
+          <div className="w-full justify-end text-[10px] text-primary flex flex-row font-bold">
+            10%
+          </div>
+          <Progress value={10} className={cx(`w-full h-2 bg-gray-300`)} />
+        </div>
+        <div className="flex flex-grow items-center justify-end py-1">
+          <div className="flex flex-row items-center gap-x-1 text-[10px] text-primary">
+            <LuCalendarDays />
+
+            <p className={cx("font-bold  line-clamp-1")}>
+              {dayDate(new Date())}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default JobCard;
+export default TaskCard;

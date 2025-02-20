@@ -14,22 +14,28 @@ import { useLocal } from "@/lib/utils/use-local";
 import { FC, useState } from "react";
 import { HiPlus } from "react-icons/hi";
 import { IoMdSave } from "react-icons/io";
-import { MdChecklist, MdOutlineEdit } from "react-icons/md";
+import { MdChecklist, MdDelete, MdOutlineEdit } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { FcSurvey } from "react-icons/fc";
 import { TiAttachment } from "react-icons/ti";
 import { cloneFM } from "@/lib/utils/cloneFm";
 import { Checkbox } from "@/lib/components/ui/checkbox";
 import { ModalPageEditorBackground } from "./ModalPageEditorBackground";
+import { apix } from "@/lib/utils/apix";
+import { actionToast } from "@/lib/utils/action";
+import { convertForm } from "@/lib/utils/convetForm";
 
 export const ModalPageTemplateTask: FC<{
   open: boolean;
   onChangeOpen: (event: boolean) => void;
-}> = ({ open, onChangeOpen }) => {
+  onSubmit?: (event?: any) => Promise<void> | any;
+  onLoad?: () => Promise<any> | any;
+}> = ({ open, onChangeOpen, onSubmit, onLoad }) => {
   const [openEditorBackground, setOpenEditorBackground] = useState(false);
   const local = useLocal({
     tbl: null as any,
     open: false,
+    fm: null as any,
     fase: "start" as "start" | "preview" | "upload",
     preview: "",
     filename: "",
@@ -42,7 +48,15 @@ export const ModalPageTemplateTask: FC<{
     <>
       <ModalPageEditorBackground
         open={openEditorBackground}
-        onChangeOpen={(event) => setOpenEditorBackground(event)}
+        onChangeOpen={(event) => {
+          setOpenEditorBackground(event);
+        }}
+        onChange={(event) => {
+          setOpenEditorBackground(false);
+          local.fm.data["cover_path"] = event?.path_origin;
+          local.fm.data["cover"] = event?.path;
+          local.fm.render();
+        }}
       />
       <Dialog open={open}>
         <DialogContent
@@ -58,12 +72,54 @@ export const ModalPageTemplateTask: FC<{
           <div className="flex flex-col flex-grow items-start">
             <ScrollArea className="w-full h-full flex flex-col gap-y-2">
               <Form
-                onSubmit={async (fm: any) => {}}
-                onLoad={async () => {
-                  return {
-                    priority: "high",
-                    status: "active",
+                onSubmit={async (fm: any) => {
+                  const data = fm?.data;
+                  const files = data.template_task_attachments?.length
+                    ? data.template_task_attachments.filter((e: any) => e?.data)
+                    : [];
+                  const form = convertForm({
+                    data: data?.template_task_checklists,
+                    task: (item, form) => {
+                      if (item?.id) {
+                        form.append("template_task_checklists[id]", item?.id);
+                      }
+                      form.append("template_task_checklists[name]", item?.name);
+                    },
+                  });
+                  const result = {
+                    ...data,
+                    "template_task_attachments[file]": files?.length
+                      ? files.map((e: any) => e.data)
+                      : [],
+                    checklist: form,
                   };
+                  delete result["template_task_attachments"];
+                  delete result["template_task_checklists"];
+                  if (data?.id) {
+                    const res = await apix({
+                      port: "onboarding",
+                      path: "/api/template-tasks/update",
+                      method: "put",
+                      value: "data.data",
+                      type: "form",
+                      data: result,
+                    });
+                  } else {
+                    const res = await apix({
+                      port: "onboarding",
+                      path: "/api/template-tasks",
+                      method: "post",
+                      value: "data.data",
+                      type: "form",
+                      data: result,
+                    });
+                  }
+                  if (typeof onSubmit === "function") await onSubmit();
+                }}
+                onLoad={onLoad}
+                onInit={(fm: any) => {
+                  local.fm = fm;
+                  local.render();
                 }}
                 showResize={false}
                 header={(fm: any) => {
@@ -80,7 +136,7 @@ export const ModalPageTemplateTask: FC<{
                                 "relative flex flex-col items-end justify-center w-full h-64 rounded-lg  bg-gray-50",
                                 css`
                                   background-image: url(${siteurl(
-                                    "/template-1.png"
+                                    fm?.data?.cover
                                   )});
                                   background-size: cover;
                                   background-position: center;
@@ -113,7 +169,7 @@ export const ModalPageTemplateTask: FC<{
                                       <Field
                                         style="underline"
                                         fm={fm}
-                                        name={"title"}
+                                        name={"name"}
                                         label={"title"}
                                         type={"text"}
                                         classField="text-white focus-within:border-b focus-within:border-b-white"
@@ -151,7 +207,7 @@ export const ModalPageTemplateTask: FC<{
                               <Field
                                 fm={fm}
                                 name={"due_duration"}
-                                label={"Due Date"}
+                                label={"Due Duration"}
                                 type={"money"}
                                 suffix={() => (
                                   <div className="text-sm px-2">Day</div>
@@ -167,16 +223,16 @@ export const ModalPageTemplateTask: FC<{
                                 onLoad={async () => {
                                   return [
                                     {
-                                      label: "High",
-                                      value: "high",
+                                      label: "HIGH",
+                                      value: "HIGH",
                                     },
                                     {
-                                      label: "Medium",
-                                      value: "medium",
+                                      label: "MEDIUM",
+                                      value: "MEDIUM",
                                     },
                                     {
-                                      label: "Low",
-                                      value: "low",
+                                      label: "LOW",
+                                      value: "LOW",
                                     },
                                   ];
                                 }}
@@ -192,12 +248,12 @@ export const ModalPageTemplateTask: FC<{
                                 onLoad={async () => {
                                   return [
                                     {
-                                      label: "Active",
-                                      value: "active",
+                                      label: "ACTIVE",
+                                      value: "ACTIVE",
                                     },
                                     {
-                                      label: "Inactive",
-                                      value: "inactive",
+                                      label: "INACTIVE",
+                                      value: "INACTIVE",
                                     },
                                   ];
                                 }}
@@ -249,13 +305,18 @@ export const ModalPageTemplateTask: FC<{
                                   let fm_row = cloneFM(fm, e);
                                   return (
                                     <div
-                                      className="w-80 max-w-full"
+                                      className="w-96 max-w-full"
                                       key={`question_${idx}`}
                                     >
                                       <Field
+                                        classField={css`
+                                          .suffix {
+                                            background: transparent;
+                                          }
+                                        `}
                                         style="underline"
                                         fm={fm_row}
-                                        name={"option"}
+                                        name={"name"}
                                         label={"option"}
                                         hidden_label={true}
                                         type={"text"}
@@ -267,6 +328,28 @@ export const ModalPageTemplateTask: FC<{
                                               checked={false}
                                               onClick={(e) => {}}
                                             />{" "}
+                                          </div>
+                                        }
+                                        suffix={
+                                          <div
+                                            className=" p-2 rounded-lg cursor-pointer items-center flex flex-row"
+                                            onClick={() => {
+                                              if (
+                                                Array.isArray(
+                                                  fm.data
+                                                    .template_task_checklists
+                                                )
+                                              ) {
+                                                fm.data.template_task_checklists =
+                                                  fm.data.template_task_checklists.filter(
+                                                    (_: any, i: any) =>
+                                                      i !== idx
+                                                  );
+                                                fm.render();
+                                              }
+                                            }}
+                                          >
+                                            <MdDelete className="w-4 h-4 text-red-500" />
                                           </div>
                                         }
                                       />
@@ -306,14 +389,36 @@ export const ModalPageTemplateTask: FC<{
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-center w-full">
+                        <div className="flex items-center w-full">
                           <Field
                             fm={fm}
-                            name={"attachments"}
+                            hidden_label={true}
+                            name={"template_task_attachments"}
                             label={"Description"}
                             type={"multi-upload"}
+                            valueKey={"path"}
+                            onChange={async () => {
+                              console.log(fm.data.template_task_attachments);
+                            }}
+                            onDelete={async (item) => {
+                              if (item?.id) {
+                                await actionToast({
+                                  task: async () => {
+                                    await apix({
+                                      port: "onboarding",
+                                      path: `/api/template-task-attachments/${item?.id}`,
+                                      method: "delete",
+                                    });
+                                  },
+                                  after: () => {},
+                                  msg_load: "Delete Files ",
+                                  msg_error: "Delete Files failed ",
+                                  msg_succes: "Delete Files success ",
+                                });
+                              }
+                            }}
                           />
-                          <label
+                          {/* <label
                             htmlFor="dropzone-file"
                             className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
                           >
@@ -346,7 +451,7 @@ export const ModalPageTemplateTask: FC<{
                               // onChange={handleFileChange}
                               accept=".xlsx"
                             />
-                          </label>
+                          </label> */}
                         </div>
                       </div>
                     </>

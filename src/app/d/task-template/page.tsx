@@ -3,7 +3,6 @@ import { apix } from "@/lib/utils/apix";
 import { getNumber } from "@/lib/utils/getNumber";
 import { useLocal } from "@/lib/utils/use-local";
 import { useEffect, useState } from "react";
-import { get_user } from "@/lib/utils/get_user";
 import { PinterestLayout } from "@/lib/components/ui/PinterestLayout";
 import JobCard from "@/app/components/JobCard";
 import { PaginationPage } from "@/lib/components/tablelist/TableList";
@@ -11,45 +10,76 @@ import get from "lodash.get";
 import { ButtonBetter } from "@/lib/components/ui/button";
 import { HiPlus } from "react-icons/hi";
 import { ModalPageTemplateTask } from "@/app/components/ModalPageTemplateTask";
+import { events } from "@/lib/utils/event";
+import { actionToast } from "@/lib/utils/action";
+import { get_params_url } from "@/lib/utils/getParamsUrl";
 
 function Page() {
   const [isClient, setIsClient] = useState(false);
   const [open, setOpen] = useState(false);
+  const take = 6;
   const local = useLocal({
     open: false,
     ready: false,
     access: true,
+    selected: null as any,
     data: [] as any[],
     count: 0,
     page: 1,
     maxPage: 100,
+    reload: async () => {
+      try {
+        await actionToast({
+          task: async () => {
+            local.ready = false;
+            local.render();
+            const params = await events("onload-param", {
+              paging: local.page,
+              take: take,
+            });
+            const res = await apix({
+              port: "onboarding",
+              value: "data.data.data",
+              path: `/api/template-tasks${params}`,
+              method: "get",
+              validate: "array",
+            });
+
+            const count = await apix({
+              port: "onboarding",
+              value: "data.data.meta.total",
+              path: `/api/template-tasks?page=1&page_size=1`,
+              method: "get",
+            });
+            local.data = res;
+            local.count = count;
+            local.maxPage = Math.ceil(getNumber(count) / take);
+            local.render();
+          },
+
+          after: () => {
+            local.ready = true;
+            local.render();
+          },
+          failed: () => {
+            local.ready = true;
+            local.data = [];
+            local.render();
+          },
+          msg_load: "Get data ",
+          msg_error: "Get data failed ",
+          msg_succes: "Get data success ",
+        });
+      } catch (ex) {}
+    },
   });
   useEffect(() => {
     setIsClient(true);
     const run = async () => {
-      try {
-        const res = await apix({
-          port: "recruitment",
-          value: "data.data.job_postings",
-          path: `/api${
-            get_user("id") ? `/` : `/no-auth/`
-          }job-postings?page=1&page_size=15&status=IN PROGRESS`,
-          method: "get",
-        });
-
-        const count = await apix({
-          port: "recruitment",
-          value: "data.data.total",
-          path: `/api${
-            get_user("id") ? `/` : `/no-auth/`
-          }job-postings?page=1&page_size=8&status=IN PROGRESS`,
-          method: "get",
-        });
-        local.data = res;
-        local.count = count;
-        local.maxPage = Math.ceil(getNumber(count) / 15);
-        local.render();
-      } catch (ex) {}
+      const page = get_params_url("page");
+      local.page = getNumber(page) ? getNumber(page) : 1;
+      local.render();
+      await local.reload();
     };
     run();
   }, []);
@@ -61,6 +91,7 @@ function Page() {
         !getNumber(local.page) ? "1" : `${getNumber(local.page)}`
       );
       window.history.pushState({}, "", currentUrl);
+      local.reload();
     }
   };
   useEffect(() => {}, []);
@@ -71,32 +102,90 @@ function Page() {
         onChangeOpen={(e) => {
           setOpen(e);
         }}
+        onSubmit={async () => {
+          setOpen(false);
+          local.page = 1;
+          local.render();
+          await local.reload();
+        }}
+        onLoad={async () => {
+          if (local.selected) {
+            const res = await apix({
+              port: "onboarding",
+              value: "data.data",
+              path: `/api/template-tasks/${local.selected.id}`,
+              method: "get",
+            });
+            console.log({
+              ...res,
+              cover: res?.CoverPath,
+              cover_path: res?.cover_path_origin,
+            });
+            return {
+              ...res,
+              cover: res?.CoverPath,
+              cover_path: res?.cover_path_origin,
+            };
+          }
+          return {
+            priority: "HIGH",
+            status: "ACTIVE",
+            cover: "/template-1.png",
+          };
+        }}
       />
-      <div className="w-full p-4 py-6 pr-6 pl-3 ">
+      <div className="w-full p-4 py-6 pr-6 pl-3 pb-1">
         <div className="flex flex-row  text-2xl font-bold">Task Template</div>
       </div>
-      <div className="w-full p-4 py-6 pr-6 pl-3 flex flex-row">
+      <div className="w-full p-4 py-6 pr-6 pl-3 flex flex-row pt-2">
         <div className="flex flex-grow">
-          <ButtonBetter onClick={() => setOpen(true)}>
+          <ButtonBetter
+            onClick={() => {
+              local.selected = null;
+              local.render();
+              setOpen(true);
+            }}
+          >
             <HiPlus className="text-xl" />
             Add New
           </ButtonBetter>
         </div>
         <div className="flex flex-grow"></div>
       </div>
-      <div className="flex flex-col flex-grow">
-        <div className="flex flex-grow pb-4 justify-start">
-          <div className="flex ">
-            <PinterestLayout
-              gap={4}
-              data={local.data}
-              child={(item, idx, data, key) => {
-                return <JobCard data={item} />;
-              }}
-              col={3}
-            />
-          </div>
-        </div>
+      <div className="flex flex-col flex-grow px-2 pb-2">
+        {local.ready ? (
+          <>
+            <div className="flex flex-grow pb-4 flex-col">
+              <div className="flex">
+                <PinterestLayout
+                  gap={4}
+                  data={local.data}
+                  child={(item, idx, data, key) => {
+                    return (
+                      <JobCard
+                        data={item}
+                        onClick={async () => {
+                          local.selected = item;
+                          local.render();
+                          setOpen(true);
+                        }}
+                      />
+                    );
+                  }}
+                  col={3}
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-grow pb-4 justify-center items-center">
+              <div className="flex-grow flex-grow flex flex-row items-center justify-center">
+                <div className="spinner-better"></div>
+              </div>
+            </div>
+          </>
+        )}
 
         {local?.maxPage <= 1 ? (
           <></>
@@ -124,7 +213,7 @@ function Page() {
             setPage={(page: any) => {}}
             countPage={1}
             countData={local.count}
-            take={15}
+            take={take}
             onChangePage={(page: number) => {
               local.page = page;
               local.render();

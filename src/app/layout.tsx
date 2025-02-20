@@ -31,6 +31,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   useEffect(() => {
     const run = async () => {
       let isUser = false;
+      globalThis.router = routerInstance;
       try {
         isUser = await userToken();
       } catch (ex) {}
@@ -42,7 +43,6 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
           const roles = await userRoleMe();
           globalThis.userRole = roles;
         } catch (ex) {}
-        globalThis.router = routerInstance;
         const user = localStorage.getItem("user");
         if (user) {
           const w = window as any;

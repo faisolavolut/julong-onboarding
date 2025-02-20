@@ -15,22 +15,27 @@ import { useLocal } from "@/lib/utils/use-local";
 import { FC, useState } from "react";
 import { HiPlus } from "react-icons/hi";
 import { IoMdSave } from "react-icons/io";
-import { MdChecklist, MdOutlineEdit } from "react-icons/md";
+import { MdChecklist, MdDelete, MdOutlineEdit } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { FcSurvey } from "react-icons/fc";
 import { TiAttachment } from "react-icons/ti";
 import { cloneFM } from "@/lib/utils/cloneFm";
 import { Checkbox } from "@/lib/components/ui/checkbox";
 import { ModalPageEditorBackground } from "./ModalPageEditorBackground";
+import { actionToast } from "@/lib/utils/action";
+import { convertForm } from "@/lib/utils/convetForm";
 
 export const ModalPageEditorTask: FC<{
   open: boolean;
   onChangeOpen: (event: boolean) => void;
-}> = ({ open, onChangeOpen }) => {
+  onSubmit?: (event?: any) => Promise<void> | any;
+  onLoad?: () => Promise<any> | any;
+}> = ({ open, onChangeOpen, onSubmit, onLoad }) => {
   const [openEditorBackground, setOpenEditorBackground] = useState(false);
   const local = useLocal({
     tbl: null as any,
     open: false,
+    fm: null as any,
     fase: "start" as "start" | "preview" | "upload",
     preview: "",
     filename: "",
@@ -44,6 +49,12 @@ export const ModalPageEditorTask: FC<{
       <ModalPageEditorBackground
         open={openEditorBackground}
         onChangeOpen={(event) => setOpenEditorBackground(event)}
+        onChange={(event) => {
+          setOpenEditorBackground(false);
+          local.fm.data["cover_path"] = event?.path_origin;
+          local.fm.data["cover"] = event?.path;
+          local.fm.render();
+        }}
       />
       <Dialog open={open}>
         <DialogContent
@@ -59,9 +70,54 @@ export const ModalPageEditorTask: FC<{
           <div className="flex flex-col flex-grow items-start">
             <ScrollArea className="w-full h-full flex flex-col gap-y-2">
               <Form
-                onSubmit={async (fm: any) => {}}
-                onLoad={async () => {
-                  return {};
+                onSubmit={async (fm: any) => {
+                  const data = fm?.data;
+                  const files = data.employee_task_attachments?.length
+                    ? data.employee_task_attachments.filter((e: any) => e?.data)
+                    : [];
+                  const form = convertForm({
+                    data: data?.employee_task_checklists,
+                    task: (item, form) => {
+                      if (item?.id) {
+                        form.append("employee_task_checklists[id]", item?.id);
+                      }
+                      form.append("employee_task_checklists[name]", item?.name);
+                    },
+                  });
+                  const result = {
+                    ...data,
+                    "employee_task_attachments[file]": files?.length
+                      ? files.map((e: any) => e.data)
+                      : [],
+                    checklist: form,
+                  };
+                  delete result["employee_task_attachments"];
+                  delete result["employee_task_checklists"];
+                  if (data?.id) {
+                    const res = await apix({
+                      port: "onboarding",
+                      path: "/api/employee-tasks/update",
+                      method: "put",
+                      value: "data.data",
+                      type: "form",
+                      data: result,
+                    });
+                  } else {
+                    const res = await apix({
+                      port: "onboarding",
+                      path: "/api/employee-tasks",
+                      method: "post",
+                      value: "data.data",
+                      type: "form",
+                      data: result,
+                    });
+                  }
+                  if (typeof onSubmit === "function") await onSubmit();
+                }}
+                onLoad={onLoad}
+                onInit={(fm: any) => {
+                  local.fm = fm;
+                  local.render();
                 }}
                 showResize={false}
                 header={(fm: any) => {
@@ -78,7 +134,7 @@ export const ModalPageEditorTask: FC<{
                                 "relative flex flex-col items-end justify-center w-full h-64 rounded-lg  bg-gray-50",
                                 css`
                                   background-image: url(${siteurl(
-                                    "/template-1.png"
+                                    fm?.data?.cover
                                   )});
                                   background-size: cover;
                                   background-position: center;
@@ -111,7 +167,7 @@ export const ModalPageEditorTask: FC<{
                                       <Field
                                         style="underline"
                                         fm={fm}
-                                        name={"title"}
+                                        name={"name"}
                                         label={"title"}
                                         type={"text"}
                                         classField="text-white focus-within:border-b focus-within:border-b-white"
@@ -148,9 +204,28 @@ export const ModalPageEditorTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
-                                name={"due_date"}
+                                name={"start_date"}
+                                label={"Start Date"}
+                                type={"date"}
+                              />
+                            </div>
+                            <div>
+                              <Field
+                                fm={fm}
+                                name={"end_date"}
                                 label={"Due Date"}
                                 type={"date"}
+                              />
+                            </div>
+                            <div>
+                              <Field
+                                fm={fm}
+                                name={"due_duration"}
+                                label={"Due Duration"}
+                                type={"money"}
+                                suffix={() => (
+                                  <div className="text-sm px-2">Day</div>
+                                )}
                               />
                             </div>
                             <div>
@@ -160,27 +235,18 @@ export const ModalPageEditorTask: FC<{
                                 label={"Priority"}
                                 type={"dropdown"}
                                 onLoad={async () => {
-                                  const res: any = await apix({
-                                    port: "recruitment",
-                                    value: "data.data.template_questions",
-                                    path: "/api/template-questions",
-                                    validate: "dropdown",
-                                    keys: {
-                                      label: "name",
-                                    },
-                                  });
                                   return [
                                     {
-                                      label: "High",
-                                      value: "high",
+                                      label: "HIGH",
+                                      value: "HIGH",
                                     },
                                     {
-                                      label: "Medium",
-                                      value: "medium",
+                                      label: "MEDIUM",
+                                      value: "MEDIUM",
                                     },
                                     {
-                                      label: "Low",
-                                      value: "low",
+                                      label: "LOW",
+                                      value: "LOW",
                                     },
                                   ];
                                 }}
@@ -196,16 +262,12 @@ export const ModalPageEditorTask: FC<{
                                 onLoad={async () => {
                                   return [
                                     {
-                                      label: "High",
-                                      value: "high",
+                                      label: "ACTIVE",
+                                      value: "ACTIVE",
                                     },
                                     {
-                                      label: "Medium",
-                                      value: "medium",
-                                    },
-                                    {
-                                      label: "Low",
-                                      value: "low",
+                                      label: "INACTIVE",
+                                      value: "INACTIVE",
                                     },
                                   ];
                                 }}
@@ -235,11 +297,12 @@ export const ModalPageEditorTask: FC<{
                               onClick={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                const data = fm?.data?.template_question || [];
+                                const data =
+                                  fm?.data?.employee_task_checklists || [];
                                 data.push({});
-                                fm.data.template_question = data;
+                                fm.data.employee_task_checklists = data;
                                 fm.render();
-                                console.log(fm.data.template_question);
+                                console.log(fm.data.employee_task_checklists);
                               }}
                             >
                               <HiPlus className="text-xl" />
@@ -248,21 +311,26 @@ export const ModalPageEditorTask: FC<{
                           </div>
                         </div>
 
-                        <div className={cx("w-full flex flex-col gap-y-2")}>
-                          {fm?.data?.template_question?.length ? (
-                            <>
-                              {fm?.data?.template_question.map(
+                        {fm?.data?.employee_task_checklists?.length ? (
+                          <>
+                            <div className={cx("w-full flex flex-col gap-y-2")}>
+                              {fm?.data?.employee_task_checklists.map(
                                 (e: any, idx: number) => {
                                   let fm_row = cloneFM(fm, e);
                                   return (
                                     <div
-                                      className="w-80 max-w-full"
+                                      className="w-96 max-w-full"
                                       key={`question_${idx}`}
                                     >
                                       <Field
+                                        classField={css`
+                                          .suffix {
+                                            background: transparent;
+                                          }
+                                        `}
                                         style="underline"
                                         fm={fm_row}
-                                        name={"option"}
+                                        name={"name"}
                                         label={"option"}
                                         hidden_label={true}
                                         type={"text"}
@@ -276,16 +344,38 @@ export const ModalPageEditorTask: FC<{
                                             />{" "}
                                           </div>
                                         }
+                                        suffix={
+                                          <div
+                                            className=" p-2 rounded-lg cursor-pointer items-center flex flex-row"
+                                            onClick={() => {
+                                              if (
+                                                Array.isArray(
+                                                  fm.data
+                                                    .employee_task_checklists
+                                                )
+                                              ) {
+                                                fm.data.employee_task_checklists =
+                                                  fm.data.employee_task_checklists.filter(
+                                                    (_: any, i: any) =>
+                                                      i !== idx
+                                                  );
+                                                fm.render();
+                                              }
+                                            }}
+                                          >
+                                            <MdDelete className="w-4 h-4 text-red-500" />
+                                          </div>
+                                        }
                                       />
                                     </div>
                                   );
                                 }
                               )}
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                         <div
                           className={cx(
                             "w-full flex flex-row border-b border-gray-300 pb-1"
@@ -313,41 +403,35 @@ export const ModalPageEditorTask: FC<{
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-center w-full">
-                          <label
-                            htmlFor="dropzone-file"
-                            className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                          >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <svg
-                                className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 20 16"
-                              >
-                                <path
-                                  stroke="currentColor"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                />
-                              </svg>
-                              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                <span className="font-semibold">
-                                  Click to upload the attachments
-                                </span>
-                              </p>
-                            </div>
-                            <input
-                              id="dropzone-file"
-                              type="file"
-                              className="hidden"
-                              // onChange={handleFileChange}
-                              accept=".xlsx"
-                            />
-                          </label>
+                        <div className="flex items-center w-full">
+                          <Field
+                            fm={fm}
+                            hidden_label={true}
+                            name={"employee_task_attachments"}
+                            label={"Description"}
+                            type={"multi-upload"}
+                            valueKey={"path"}
+                            onChange={async () => {
+                              console.log(fm.data.employee_task_attachments);
+                            }}
+                            onDelete={async (item) => {
+                              if (item?.id) {
+                                await actionToast({
+                                  task: async () => {
+                                    await apix({
+                                      port: "onboarding",
+                                      path: `/api/template-task-attachments/${item?.id}`,
+                                      method: "delete",
+                                    });
+                                  },
+                                  after: () => {},
+                                  msg_load: "Delete Files ",
+                                  msg_error: "Delete Files failed ",
+                                  msg_succes: "Delete Files success ",
+                                });
+                              }
+                            }}
+                          />
                         </div>
                       </div>
                     </>

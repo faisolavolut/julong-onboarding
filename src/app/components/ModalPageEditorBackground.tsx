@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/lib/components/ui/dialog";
 import { ScrollArea } from "@/lib/components/ui/scroll-area";
+import { apix } from "@/lib/utils/apix";
 import getCroppedImg from "@/lib/utils/cropImage";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
@@ -43,12 +44,6 @@ export const ModalPageEditorBackground: FC<{
     console.log(croppedArea, croppedAreaPixels);
     setCropArea(croppedAreaPixels);
   };
-  // const saveCroppedImage = async () => {
-  //   if (image && cropArea) {
-  //     const croppedImg = await getCroppedImg(image, cropArea);
-  //     setCroppedImage(croppedImg);
-  //   }
-  // };
   const local = useLocal({
     tbl: null as any,
     open: false,
@@ -175,7 +170,18 @@ export const ModalPageEditorBackground: FC<{
                                   croppedImage,
                                   "cropped-image.jpg"
                                 );
-
+                                const result = await apix({
+                                  port: "onboarding",
+                                  path: "/api/covers/upload",
+                                  value: "data.data",
+                                  method: "post",
+                                  type: "form",
+                                  data: {
+                                    file: res,
+                                  },
+                                });
+                                if (result && typeof onChange === "function")
+                                  onChange(result);
                                 console.log("donee", URL.createObjectURL(res));
                               } catch (e) {
                                 console.error(e);

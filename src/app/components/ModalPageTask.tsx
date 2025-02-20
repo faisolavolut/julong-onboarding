@@ -1,6 +1,6 @@
 import { Field } from "@/lib/components/form/Field";
 import { Form } from "@/lib/components/form/Form";
-import { ButtonBetter } from "@/lib/components/ui/button";
+import { ButtonContainer } from "@/lib/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,18 +9,18 @@ import {
   DialogTitle,
 } from "@/lib/components/ui/dialog";
 import { ScrollArea } from "@/lib/components/ui/scroll-area";
-import { apix } from "@/lib/utils/apix";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
 import { FC, useState } from "react";
-import { IoMdSave } from "react-icons/io";
 import { MdChecklist } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { FcSurvey } from "react-icons/fc";
 import { TiAttachment } from "react-icons/ti";
 import { cloneFM } from "@/lib/utils/cloneFm";
-import { Checkbox } from "@/lib/components/ui/checkbox";
 import { ModalPageEditorBackground } from "./ModalPageEditorBackground";
+import { Progress } from "@/lib/components/ui/Progress";
+import { IoCameraOutline, IoCheckmarkCircle } from "react-icons/io5";
+import { Alert } from "@/lib/components/ui/alert";
 
 export const ModalPageTask: FC<{
   open: boolean;
@@ -61,6 +61,7 @@ export const ModalPageTask: FC<{
           <div className="flex flex-col flex-grow items-start">
             <ScrollArea className="w-full h-full flex flex-col gap-y-2">
               <Form
+                className={" px-4"}
                 onSubmit={onSubmit}
                 onLoad={onLoad}
                 afterLoad={afterLoad}
@@ -72,7 +73,7 @@ export const ModalPageTask: FC<{
                 children={(fm: any) => {
                   return (
                     <>
-                      <div className="flex flex-col flex-grow gap-y-4">
+                      <div className="flex flex-col flex-grow gap-y-4 ">
                         <div className={cx("w-full flex flex-row ")}>
                           <div className="flex items-center justify-center w-full">
                             <div
@@ -115,10 +116,43 @@ export const ModalPageTask: FC<{
                             Details
                           </div>
                           <div className="flex flex-row flex-grow items-center justify-end gap-x-2">
-                            <ButtonBetter>
-                              <IoMdSave className="text-xl" />
-                              Save
-                            </ButtonBetter>
+                            <Alert
+                              type={"save"}
+                              msg={"Are you sure you want to save this task?"}
+                              onClick={() => {
+                                fm.submit();
+                              }}
+                            >
+                              <ButtonContainer className={"bg-primary"}>
+                                Save
+                              </ButtonContainer>
+                            </Alert>
+                            <Alert
+                              type={"save"}
+                              msg={"Are you sure you want to revise this task?"}
+                              onClick={() => {
+                                fm.submit();
+                              }}
+                            >
+                              <ButtonContainer
+                                variant={"destructive"}
+                                className="bg-white border border-red-500 text-red-500"
+                              >
+                                <span className="text-red-500">Revised</span>
+                              </ButtonContainer>
+                            </Alert>
+
+                            <Alert
+                              type={"save"}
+                              msg={
+                                "Are you sure you want to complete this task?"
+                              }
+                              onClick={() => {
+                                fm.submit();
+                              }}
+                            >
+                              <ButtonContainer>Complete</ButtonContainer>
+                            </Alert>
                           </div>
                         </div>
                         <div className={cx("w-full flex flex-row")}>
@@ -126,9 +160,28 @@ export const ModalPageTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
-                                name={"due_date"}
+                                name={"start_date"}
+                                label={"Start Date"}
+                                type={"date"}
+                              />
+                            </div>
+                            <div>
+                              <Field
+                                fm={fm}
+                                name={"end_date"}
                                 label={"Due Date"}
                                 type={"date"}
+                              />
+                            </div>
+                            <div>
+                              <Field
+                                fm={fm}
+                                name={"due_duration"}
+                                label={"Due Duration"}
+                                type={"money"}
+                                suffix={() => (
+                                  <div className="text-sm px-2">Day</div>
+                                )}
                               />
                             </div>
                             <div>
@@ -138,27 +191,18 @@ export const ModalPageTask: FC<{
                                 label={"Priority"}
                                 type={"dropdown"}
                                 onLoad={async () => {
-                                  const res: any = await apix({
-                                    port: "recruitment",
-                                    value: "data.data.template_questions",
-                                    path: "/api/template-questions",
-                                    validate: "dropdown",
-                                    keys: {
-                                      label: "name",
-                                    },
-                                  });
                                   return [
                                     {
-                                      label: "High",
-                                      value: "high",
+                                      label: "HIGH",
+                                      value: "HIGH",
                                     },
                                     {
-                                      label: "Medium",
-                                      value: "medium",
+                                      label: "MEDIUM",
+                                      value: "MEDIUM",
                                     },
                                     {
-                                      label: "Low",
-                                      value: "low",
+                                      label: "LOW",
+                                      value: "LOW",
                                     },
                                   ];
                                 }}
@@ -174,16 +218,12 @@ export const ModalPageTask: FC<{
                                 onLoad={async () => {
                                   return [
                                     {
-                                      label: "High",
-                                      value: "high",
+                                      label: "ACTIVE",
+                                      value: "ACTIVE",
                                     },
                                     {
-                                      label: "Medium",
-                                      value: "medium",
-                                    },
-                                    {
-                                      label: "Low",
-                                      value: "low",
+                                      label: "INACTIVE",
+                                      value: "INACTIVE",
                                     },
                                   ];
                                 }}
@@ -211,21 +251,94 @@ export const ModalPageTask: FC<{
                           <div className="flex flex-row flex-grow items-center justify-end gap-x-2"></div>
                         </div>
 
-                        <div className={cx("w-full flex flex-col gap-y-2")}>
-                          {fm?.data?.template_question?.length ? (
-                            <>
-                              {fm?.data?.template_question.map(
+                        <div className="flex flex-row relative items-center gap-x-2">
+                          <div className="flex flex-grow items-center flex-row ">
+                            <Progress
+                              value={80}
+                              className={cx(
+                                `w-full h-5 bg-gray-300 rounded-md`
+                              )}
+                              classNameIndicator={"rounded-md"}
+                            />
+                          </div>
+                          <div className="text-md text-primary flex flex-row font-bold">
+                            10%
+                          </div>
+                        </div>
+                        {fm?.data?.template_task_checklists?.length ? (
+                          <>
+                            <div className={cx("w-full flex flex-col gap-y-2")}>
+                              {fm?.data?.template_task_checklists.map(
                                 (e: any, idx: number) => {
                                   let fm_row = cloneFM(fm, e);
                                   return (
                                     <div
-                                      className="w-80 max-w-full"
+                                      className="w-full flex flex-row items-center "
                                       key={`question_${idx}`}
                                     >
-                                      <Field
+                                      <div className="flex flex-row items-center flex-grow">
+                                        {true ? (
+                                          <div className="text-primary">
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="24"
+                                              height="24"
+                                              viewBox="0 0 24 24"
+                                              className="fill-sky-500"
+                                            >
+                                              <path
+                                                fill="currentColor"
+                                                d="m10.6 14.092l-2.496-2.496q-.14-.14-.344-.15q-.204-.01-.364.15t-.16.354q0 .194.16.354l2.639 2.638q.242.243.565.243q.323 0 .565-.243l5.477-5.477q.14-.14.15-.344q.01-.204-.15-.363q-.16-.16-.354-.16q-.194 0-.353.16L10.6 14.092ZM5.615 20q-.69 0-1.152-.462Q4 19.075 4 18.385V5.615q0-.69.463-1.152Q4.925 4 5.615 4h12.77q.69 0 1.152.463q.463.462.463 1.152v12.77q0 .69-.462 1.152q-.463.463-1.153.463H5.615Z"
+                                              />
+                                            </svg>
+                                          </div>
+                                        ) : (
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="24"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              fill="currentColor"
+                                              d="M5.615 20q-.69 0-1.152-.462Q4 19.075 4 18.385V5.615q0-.69.463-1.152Q4.925 4 5.615 4h12.77q.69 0 1.152.463q.463.462.463 1.152v12.77q0 .69-.462 1.152q-.463.463-1.153.463H5.615Zm0-1h12.77q.23 0 .423-.192q.192-.193.192-.423V5.615q0-.23-.192-.423Q18.615 5 18.385 5H5.615q-.23 0-.423.192Q5 5.385 5 5.615v12.77q0 .23.192.423q.193.192.423.192Z"
+                                            />
+                                          </svg>
+                                        )}
+
+                                        <div>{e?.name}</div>
+                                      </div>
+                                      <div className="flex flex-row items-center">
+                                        {true ? (
+                                          <div
+                                            className={cx(
+                                              "px-2 py-1 text-xs rounded-md",
+                                              true
+                                                ? "bg-gray-500  text-white"
+                                                : "bg-primary cursor-pointer text-white"
+                                            )}
+                                          >
+                                            Verify
+                                          </div>
+                                        ) : (
+                                          <div
+                                            className={cx(
+                                              "px-2 py-1 text-lg rounded-md text-green-500"
+                                            )}
+                                          >
+                                            <IoCheckmarkCircle />
+                                          </div>
+                                        )}
+                                      </div>
+                                      {/* <Field
+                                        classField={css`
+                                          .suffix {
+                                            background: transparent;
+                                          }
+                                        `}
                                         style="underline"
                                         fm={fm_row}
-                                        name={"option"}
+                                        name={"name"}
                                         label={"option"}
                                         hidden_label={true}
                                         type={"text"}
@@ -239,16 +352,24 @@ export const ModalPageTask: FC<{
                                             />{" "}
                                           </div>
                                         }
-                                      />
+                                        suffix={
+                                          <div
+                                            className=" p-2 rounded-lg cursor-pointer items-center flex flex-row"
+                                            onClick={() => {
+                                              fm.render();
+                                            }}
+                                          ></div>
+                                        }
+                                      /> */}
                                     </div>
                                   );
                                 }
                               )}
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                         <div
                           className={cx(
                             "w-full flex flex-row border-b border-gray-300 pb-1"
@@ -271,7 +392,16 @@ export const ModalPageTask: FC<{
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-center w-full"></div>
+                        <div
+                          className={cx(
+                            "w-full flex flex-row border-b border-gray-300 pb-1"
+                          )}
+                        >
+                          <div className="flex flex-row items-center gap-x-2 font-bold text-md">
+                            <IoCameraOutline className="text-xl" />
+                            Proof
+                          </div>
+                        </div>
                       </div>
                     </>
                   );
