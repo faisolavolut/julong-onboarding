@@ -8,16 +8,8 @@ RUN apt-get update && apt-get install -y git && apt-get clean
 RUN git clone https://github.com/faisolavolut/julong-lib.git src/lib
 
 COPY package.json package-lock.json ./
-# Install dependencies utama
-RUN npm install --legacy-peer-deps
-
-# Set working directory ke library sebelum install dependensinya
-WORKDIR /app/src/lib
-
-# Install dependencies untuk lib
-RUN npm install --legacy-peer-deps
-# Set back to main working directory
-WORKDIR /app
+# Install dependencies
+RUN npm install
 
 # Stage 2: Build aplikasi
 FROM node:22-slim AS builder
