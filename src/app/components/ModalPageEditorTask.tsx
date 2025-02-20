@@ -24,6 +24,7 @@ import { Checkbox } from "@/lib/components/ui/checkbox";
 import { ModalPageEditorBackground } from "./ModalPageEditorBackground";
 import { actionToast } from "@/lib/utils/action";
 import { convertForm } from "@/lib/utils/convetForm";
+import { normalDate } from "@/lib/utils/date";
 
 export const ModalPageEditorTask: FC<{
   open: boolean;
@@ -86,6 +87,8 @@ export const ModalPageEditorTask: FC<{
                   });
                   const result = {
                     ...data,
+                    start_date: normalDate(data?.start_date),
+                    end_date: normalDate(data?.end_date),
                     "employee_task_attachments[file]": files?.length
                       ? files.map((e: any) => e.data)
                       : [],

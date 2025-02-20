@@ -5,17 +5,22 @@ import { Alert } from "@/lib/components/ui/alert";
 import { BreadcrumbBetterLink } from "@/lib/components/ui/breadcrumb-link";
 import { ButtonContainer } from "@/lib/components/ui/button";
 import { apix } from "@/lib/utils/apix";
+import { normalDate } from "@/lib/utils/date";
+import { events } from "@/lib/utils/event";
 import { useLocal } from "@/lib/utils/use-local";
 import { notFound } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { IoMdSave } from "react-icons/io";
+import { components } from "react-select";
 
 function Page() {
+  const [value, onChange] = useState<readonly any[]>([]);
   const labelPage = "Event";
   const urlPage = `/d/event`;
   const local = useLocal({
     can_add: false,
     ready: false as boolean,
+    search: null as any,
   });
 
   useEffect(() => {
@@ -26,7 +31,31 @@ function Page() {
     };
     run();
   }, []);
-
+  const loadOptions = async (
+    searchQuery: any,
+    loadedOptions: any,
+    { page }: any
+  ) => {
+    const params = await events("onload-param", {
+      paging: page,
+      take: 10,
+      search: searchQuery,
+    });
+    const result: any = await apix({
+      port: "portal",
+      value: "data.data.employees",
+      path: `/api/employees${params}`,
+      validate: "array",
+    });
+    const responseJSON = result;
+    return {
+      options: responseJSON,
+      hasMore: responseJSON.length >= 1,
+      additional: {
+        page: searchQuery ? 2 : page + 1,
+      },
+    };
+  };
   if (local.ready && !local.can_add) return notFound();
 
   return (
@@ -68,13 +97,25 @@ function Page() {
         );
       }}
       onSubmit={async (fm: any) => {
+        const result = {
+          ...fm.data,
+          start_date: normalDate(fm?.data?.start_date),
+          end_date: normalDate(fm?.data?.end_date),
+          event_employees: fm.data.employees?.length
+            ? fm.data.employees.map((e: any) => {
+                return {
+                  employee_id: e?.id,
+                };
+              })
+            : [],
+        };
         const res = await apix({
-          port: "recruitment",
+          port: "onboarding",
           value: "data.data",
-          path: "/api/document-verifications",
+          path: "/api/events",
           method: "post",
           data: {
-            ...fm.data,
+            ...result,
           },
         });
         if (res) navigate(`${urlPage}/${res?.id}/edit`);
@@ -94,6 +135,36 @@ function Page() {
                 <div>
                   <Field
                     fm={fm}
+                    name={"name"}
+                    label={"Event Name"}
+                    type={"text"}
+                    required={true}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
+                    name={"template_task_id"}
+                    label={"Task"}
+                    type={"dropdown"}
+                    required={true}
+                    onLoad={async () => {
+                      const res: any = await apix({
+                        port: "onboarding",
+                        value: "data.data.data",
+                        path: "/api/template-tasks",
+                        validate: "dropdown",
+                        keys: {
+                          label: "name",
+                        },
+                      });
+                      return res;
+                    }}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
                     name={"start_date"}
                     label={"Start Date"}
                     type={"date"}
@@ -103,7 +174,7 @@ function Page() {
                 <div>
                   <Field
                     fm={fm}
-                    name={"due_date"}
+                    name={"end_date"}
                     label={"Due Date"}
                     type={"date"}
                     required={true}
@@ -112,50 +183,28 @@ function Page() {
                 <div>
                   <Field
                     fm={fm}
-                    name={"id_tag"}
-                    label={"Tag"}
-                    type={"dropdown"}
-                    required={true}
-                    onLoad={async () => {
-                      const res: any = await apix({
-                        port: "recruitment",
-                        value: "data.data.template_questions",
-                        path: "/api/template-questions",
-                        validate: "dropdown",
-                        keys: {
-                          label: "name",
-                        },
-                      });
-                      return res;
-                    }}
-                  />
-                </div>
-                <div>
-                  <Field
-                    fm={fm}
-                    isBetter={true}
-                    name={"assignees"}
+                    name={"employees"}
                     label={"Assignees"}
-                    type={"multi-dropdown"}
+                    type={"multi-async"}
                     required={true}
-                    onLoad={async () => {
-                      const res: any = await apix({
-                        port: "recruitment",
-                        value: "data.data.template_questions",
-                        path: "/api/template-questions",
-                        validate: "dropdown",
-                        keys: {
-                          label: "name",
-                        },
+                    onLoad={async (param: any) => {
+                      const params = await events("onload-param", param);
+                      const result: any = await apix({
+                        port: "portal",
+                        value: "data.data.employees",
+                        path: `/api/employees${params}`,
+                        validate: "array",
                       });
-                      return res;
+                      return result;
                     }}
+                    onValue={(option) => option.id}
+                    onLabel={(option) => option.name}
                   />
                 </div>
                 <div className="col-span-2">
                   <Field
                     fm={fm}
-                    name={"noted"}
+                    name={"description"}
                     label={"Noted"}
                     type={"textarea"}
                   />
@@ -168,5 +217,19 @@ function Page() {
     />
   );
 }
-
+const MultiValue = (props: any) => {
+  return (
+    <components.MultiValue
+      {...props}
+      className={cx(
+        "selected-multi-value rounded-lg  bg-gray-200",
+        css`
+          border-radius: 6px !important;
+        `
+      )}
+    >
+      {props.children}
+    </components.MultiValue>
+  );
+};
 export default Page;

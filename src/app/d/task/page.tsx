@@ -85,10 +85,12 @@ function Page() {
           header: () => <span>Action</span>,
           sortable: false,
           renderCell: ({ row }: any) => {
+            // const id = row?.id || "858451f3-ac12-4a5c-be9f-411765b70802";
+            const id = "858451f3-ac12-4a5c-be9f-411765b70802";
             return (
               <div className="flex items-center gap-x-0.5 whitespace-nowrap">
                 <ButtonBetterTooltip
-                  href={`/d/task/${row?.id}`}
+                  href={`/d/task/${id}`}
                   tooltip={"View Task Employee"}
                   className="bg-primary"
                 >
@@ -102,27 +104,20 @@ function Page() {
         },
       ]}
       onLoad={async (param: any) => {
-        return [
-          { id: 1, name: "Employee 1" },
-          { id: 2, name: "Employee 2" },
-          { id: 3, name: "Employee 3" },
-          { id: 4, name: "Employee 4" },
-        ];
         const params = await events("onload-param", param);
         const result: any = await apix({
-          port: "recruitment",
-          value: "data.data.mp_request_header",
-          path: `/api/mp-requests${params}`,
+          port: "portal",
+          value: "data.data.employees",
+          path: `/api/employees${params}`,
           validate: "array",
         });
         return result;
       }}
       onCount={async () => {
-        return 4;
         const result: any = await apix({
-          port: "recruitment",
+          port: "portal",
           value: "data.data.total",
-          path: `/api/mp-requests?page=1&page_size=1`,
+          path: `/api/employees?page=1&page_size=1`,
           validate: "object",
         });
         return getNumber(result);

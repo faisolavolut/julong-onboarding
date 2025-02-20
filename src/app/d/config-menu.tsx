@@ -24,6 +24,6 @@ export const configMenu = [
     title: "Event",
     icon: <MdOutlineEventAvailable />,
     href: "/d/event",
-    permision: ["read-event"],
+    permision: ["read-events"],
   },
 ];

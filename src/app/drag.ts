@@ -256,7 +256,7 @@
 //                                 break;
 
 //                               case "DOCUMENT_CHECKING":
-//                                 return "Document Checking";
+//                                 return "Events";
 //                                 break;
 
 //                               default:

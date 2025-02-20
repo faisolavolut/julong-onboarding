@@ -127,10 +127,18 @@ function Page() {
               cover_path: res?.cover_path_origin,
             };
           }
+
+          const result: any = await apix({
+            port: "onboarding",
+            value: "data.data.total",
+            path: `/api/covers?page=1&page_size=1`,
+            validate: "object",
+          });
           return {
             priority: "HIGH",
             status: "ACTIVE",
-            cover: "/template-1.png",
+            cover: result?.[0]?.path,
+            cover_path: result?.[0]?.path_origin,
           };
         }}
       />

@@ -14,10 +14,16 @@ export const statusMpp = [
   { value: "OFF_BUDGET", label: "Off Budget" },
   { value: "ON_BUDGET", label: "On Budget" },
   { value: "APPLIED", label: "Applied" },
+  { value: "HIGH", label: "High" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "LOW", label: "Low" },
+  { value: "UPCOMING", label: "Upcoming" },
+  { value: "ONGOING", label: "Ongoing" },
+  { value: "FINISHED", label: "Finished" },
 ];
 export const getStatusLabel = (value: string) => {
   const status = statusMpp.find(
-    (item) => item.value.toLowerCase() === value.toLowerCase()
+    (item) => value && item.value.toLowerCase() === value.toLowerCase()
   );
   return status ? status.label : value;
 };

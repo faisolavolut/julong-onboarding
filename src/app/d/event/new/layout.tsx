@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 interface RootLayoutProps {
   children: React.ReactNode;
 }
-const permision = ["read-task-template"];
+const permision = ["create-events"];
 
 const ValidateLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const [isClient, setIsClient] = useState(false);

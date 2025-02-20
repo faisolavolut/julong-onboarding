@@ -1,3 +1,4 @@
+import { ListUIClean } from "@/lib/components/list/ListUIClean";
 import { ButtonBetter } from "@/lib/components/ui/button";
 import {
   Dialog,
@@ -9,6 +10,8 @@ import {
 import { ScrollArea } from "@/lib/components/ui/scroll-area";
 import { apix } from "@/lib/utils/apix";
 import getCroppedImg from "@/lib/utils/cropImage";
+import { events } from "@/lib/utils/event";
+import { getNumber } from "@/lib/utils/getNumber";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
 import { FC, useState } from "react";
@@ -101,25 +104,56 @@ export const ModalPageEditorBackground: FC<{
             <ScrollArea className="w-full h-full flex flex-col gap-y-4">
               {local.tab === "themes" ? (
                 <>
-                  {listThemes.map((e, idx) => {
-                    return (
-                      <div
-                        key={`theme-${idx}`}
-                        className={cx(
-                          "relative flex flex-col items-end mb-4 cursor-pointer justify-center w-full h-52 rounded-lg  bg-gray-50",
-                          css`
-                            background-image: url(${siteurl(`/${e}`)});
-                            background-size: cover;
-                            background-position: center;
-                          `
-                        )}
-                        onClick={() => {
-                          onChangeOpen(false);
-                          if (typeof onChange === "function") onChange(e);
-                        }}
-                      ></div>
-                    );
-                  })}
+                  <ListUIClean
+                    name="themes"
+                    content={({ item }: any) => {
+                      return (
+                        <>
+                          <div
+                            className={cx(
+                              "relative flex flex-col items-end mb-4 cursor-pointer justify-center w-full h-52 rounded-lg  bg-gray-50",
+                              css`
+                                background-image: url(${siteurl(
+                                  `${item?.path}`
+                                )});
+                                background-size: cover;
+                                background-position: center;
+                              `
+                            )}
+                            onClick={() => {
+                              onChangeOpen(false);
+                              const result = {
+                                path_origin: item?.path_origin,
+                                path: item?.path,
+                              };
+                              if (typeof onChange === "function")
+                                onChange(result);
+                            }}
+                          ></div>
+                        </>
+                      );
+                    }}
+                    onLoad={async (param: any) => {
+                      const params = await events("onload-param", param);
+                      const result: any = await apix({
+                        port: "onboarding",
+                        value: "data.data.covers",
+                        path: `/api/covers${params}`,
+                        validate: "array",
+                      });
+                      console.log({ result });
+                      return result;
+                    }}
+                    onCount={async () => {
+                      const result: any = await apix({
+                        port: "onboarding",
+                        value: "data.data.total",
+                        path: `/api/covers?page=1&page_size=1`,
+                        validate: "object",
+                      });
+                      return getNumber(result);
+                    }}
+                  />
                 </>
               ) : (
                 <>

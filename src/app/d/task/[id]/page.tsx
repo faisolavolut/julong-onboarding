@@ -16,6 +16,7 @@ import { TaskCard } from "@/app/components/TaskCard";
 import { getParams } from "@/lib/utils/get-params";
 import { convertForm } from "@/lib/utils/convetForm";
 import { get_user } from "@/lib/utils/get_user";
+import { normalDate } from "@/lib/utils/date";
 
 function Page() {
   const id = getParams("id");
@@ -31,6 +32,14 @@ function Page() {
       { id: "completed", name: "Completed", count: 0 },
     ],
     ready: false,
+    refresh: () => {
+      local.ready = false;
+      local.render();
+      setTimeout(() => {
+        local.ready = true;
+        local.render();
+      }, 100);
+    },
   });
 
   useEffect(() => {
@@ -83,22 +92,25 @@ function Page() {
                 path: `/api/employee-tasks/${local.selected.id}`,
                 method: "get",
               });
-              console.log({
-                ...res,
-                cover: res?.CoverPath,
-                cover_path: res?.cover_path_origin,
-              });
               return {
                 ...res,
                 cover: res?.CoverPath,
                 cover_path: res?.cover_path_origin,
               };
             }
+            const result: any = await apix({
+              port: "onboarding",
+              value: "data.data.total",
+              path: `/api/covers?page=1&page_size=1`,
+              validate: "object",
+            });
             return {
               employee_id: id,
+              kanban: "TO_DO",
               priority: "HIGH",
               status: "ACTIVE",
-              cover: "/template-1.png",
+              cover: result?.[0]?.path,
+              cover_path: result?.[0]?.path_origin,
             };
           }}
         />
@@ -112,18 +124,17 @@ function Page() {
               const res = await apix({
                 port: "onboarding",
                 value: "data.data",
-                path: `/api/template-tasks/${local.selected.id}`,
+                path: `/api/employee-tasks/${local.selected.id}`,
                 method: "get",
               });
-              console.log({
-                ...res,
-                cover: res?.CoverPath,
-                cover_path: res?.cover_path_origin,
-              });
+              const data = res?.employee_task_checklists || [];
+              const check = data.filter((e: any) => e?.verified_by);
+              const progress = Math.ceil((check?.length / data?.length) * 100);
               return {
                 ...res,
-                cover: res?.CoverPath,
+                cover: res?.cover_path,
                 cover_path: res?.cover_path_origin,
+                progress: progress > 100 ? 100 : progress,
               };
             }
             return {
@@ -138,27 +149,43 @@ function Page() {
             const form = convertForm({
               data: data?.employee_task_checklists,
               task: (item, form) => {
+                console.log("employee_task_checklists[id]", item?.id);
                 if (item?.id) {
                   form.append("employee_task_checklists[id]", item?.id);
                   form.append("employee_task_checklists[name]", item?.name);
-                  if (item?.is_checked === "YES") {
+                  if (item?.is_checked === "YES" && item?.verified_by) {
                     form.append("employee_task_checklists[is_checked]", "YES");
                     form.append(
                       "employee_task_checklists[verified_by]",
-                      get_user("employee.id")
+                      item?.verified_by
                     );
                   }
+                } else {
+                  form.append("employee_task_checklists[name]", item?.name);
+                }
+              },
+            });
+            const file = convertForm({
+              data: data?.employee_task_attachments,
+              task: (item, form) => {
+                if (item?.id) {
+                } else {
+                  form.append("employee_task_attachments[file]", item?.data);
                 }
               },
             });
             const result = {
               ...data,
               checklist: form,
+              start_date: normalDate(data?.start_date),
+              end_date: normalDate(data?.end_date),
+              verified_by: get_user("employee.id"),
+              file,
             };
             delete result["employee_task_attachments"];
             delete result["employee_task_checklists"];
             delete result["proof"];
-
+            console.log({ result });
             const res = await apix({
               port: "onboarding",
               path: "/api/employee-tasks/update",
@@ -175,6 +202,14 @@ function Page() {
             }, 100);
           }}
           afterLoad={async (fm) => {}}
+          refresh={async () => {
+            local.ready = false;
+            local.render();
+            setTimeout(() => {
+              local.ready = true;
+              local.render();
+            }, 100);
+          }}
         />
         <div className="flex flex-grow flex-row justify-end items-center">
           <ButtonBetter onClick={() => setOpen(true)}>
@@ -225,32 +260,20 @@ function Page() {
               );
             }}
             onLoad={async (param: any) => {
-              const params = await events("onload-param", param);
-
-              const res = await apix({
-                port: "onboarding",
-                value: "data.data.data",
-                path: `/api/template-tasks${params}`,
-                method: "get",
-                validate: "array",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "TO_DO",
+                param: param,
               });
-              return res;
-              // const result: any = await apix({
-              //   port: "portal",
-              //   value: "data.data.organizations",
-              //   path: `/api/organizations${params}`,
-              //   validate: "array",
-              // });
-              // return result;
+              return result;
             }}
             onCount={async () => {
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data",
-                path: `/api/employee-tasks/count?employee_id=${id}&kanban=TO_DO`,
-                validate: "object",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "TO_DO",
+                mode: "count",
               });
-              return getNumber(result);
+              return result;
             }}
           />
           <ListUI
@@ -289,23 +312,20 @@ function Page() {
               );
             }}
             onLoad={async (param: any) => {
-              const params = await events("onload-param", param);
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data.organizations",
-                path: `/api/organizations${params}`,
-                validate: "array",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "IN_PROGRESS",
+                param: param,
               });
               return result;
             }}
             onCount={async () => {
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data",
-                path: `/api/employee-tasks/count?employee_id=${id}&kanban=IN_PROGRESS`,
-                validate: "object",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "IN_PROGRESS",
+                mode: "count",
               });
-              return getNumber(result);
+              return result;
             }}
           />
           <ListUI
@@ -344,23 +364,20 @@ function Page() {
               );
             }}
             onLoad={async (param: any) => {
-              const params = await events("onload-param", param);
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data.organizations",
-                path: `/api/organizations${params}`,
-                validate: "array",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "NEED_REVIEW",
+                param: param,
               });
               return result;
             }}
             onCount={async () => {
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data",
-                path: `/api/employee-tasks/count?employee_id=${id}&kanban=NEED_REVIEW`,
-                validate: "object",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "NEED_REVIEW",
+                mode: "count",
               });
-              return getNumber(result);
+              return result;
             }}
           />
           <ListUI
@@ -399,23 +416,20 @@ function Page() {
               );
             }}
             onLoad={async (param: any) => {
-              const params = await events("onload-param", param);
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data.organizations",
-                path: `/api/organizations${params}`,
-                validate: "array",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "COMPLETED",
+                param: param,
               });
               return result;
             }}
             onCount={async () => {
-              const result: any = await apix({
-                port: "portal",
-                value: "data.data",
-                path: `/api/employee-tasks/count?employee_id=${id}&kanban=COMPLETED`,
-                validate: "object",
+              const result: any = await getDataKanban({
+                employee_id: id,
+                status: "COMPLETED",
+                mode: "count",
               });
-              return getNumber(result);
+              return result;
             }}
           />
         </div>
@@ -424,4 +438,38 @@ function Page() {
   );
 }
 
+const getDataKanban = async ({
+  employee_id,
+  status,
+  param,
+  mode = "list",
+}: {
+  employee_id: string | any;
+  status: "TO_DO" | "IN_PROGRESS" | "NEED_REVIEW" | "COMPLETED";
+  param?: any;
+  mode?: "count" | "list";
+}) => {
+  if (mode === "count") {
+    const result: any = await apix({
+      port: "onboarding",
+      value: "data.data.total",
+      path: `/api/employee-tasks/employee-kanban?employee_id=${employee_id}&kanban=${status}&page=1&page_size=1`,
+      validate: "object",
+    });
+    return getNumber(result);
+  }
+  const params = await events("onload-param", {
+    ...param,
+    kanban: status,
+    employee_id: employee_id,
+  });
+  const res = await apix({
+    port: "onboarding",
+    value: "data.data.employee_tasks",
+    path: `/api/employee-tasks/employee-kanban${params}`,
+    method: "get",
+    validate: "array",
+  });
+  return res;
+};
 export default Page;

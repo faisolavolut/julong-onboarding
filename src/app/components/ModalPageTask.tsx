@@ -1,6 +1,6 @@
 import { Field } from "@/lib/components/form/Field";
 import { Form } from "@/lib/components/form/Form";
-import { ButtonContainer } from "@/lib/components/ui/button";
+import { ButtonBetter, ButtonContainer } from "@/lib/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,15 +12,22 @@ import { ScrollArea } from "@/lib/components/ui/scroll-area";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
 import { FC, useState } from "react";
-import { MdChecklist } from "react-icons/md";
+import { MdChecklist, MdDelete, MdOutlineEdit } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { FcSurvey } from "react-icons/fc";
 import { TiAttachment } from "react-icons/ti";
 import { cloneFM } from "@/lib/utils/cloneFm";
 import { ModalPageEditorBackground } from "./ModalPageEditorBackground";
 import { Progress } from "@/lib/components/ui/Progress";
-import { IoCameraOutline, IoCheckmarkCircle } from "react-icons/io5";
+import { IoCameraOutline, IoCheckmarkCircle, IoEye } from "react-icons/io5";
 import { Alert } from "@/lib/components/ui/alert";
+import { actionToast } from "@/lib/utils/action";
+import { apix } from "@/lib/utils/apix";
+import { Checkbox } from "@/lib/components/ui/checkbox";
+import { HiPlus } from "react-icons/hi";
+import { IoMdSave } from "react-icons/io";
+import { get_user } from "@/lib/utils/get_user";
+import { getNumber } from "@/lib/utils/getNumber";
 
 export const ModalPageTask: FC<{
   open: boolean;
@@ -28,7 +35,8 @@ export const ModalPageTask: FC<{
   onLoad: () => Promise<any>;
   afterLoad?: (fm: any) => Promise<void>;
   onSubmit: (fm: any) => Promise<void>;
-}> = ({ open, onChangeOpen, onLoad, afterLoad, onSubmit }) => {
+  refresh: () => Promise<void>;
+}> = ({ open, onChangeOpen, onLoad, afterLoad, onSubmit, refresh }) => {
   const [openEditorBackground, setOpenEditorBackground] = useState(false);
   const local = useLocal({
     tbl: null as any,
@@ -36,9 +44,11 @@ export const ModalPageTask: FC<{
     fase: "start" as "start" | "preview" | "upload",
     preview: "",
     filename: "",
+    fm: null as any,
     extension: "",
     file: null as any,
     count: 0 as number,
+    backup: null as any,
   });
 
   return (
@@ -46,6 +56,12 @@ export const ModalPageTask: FC<{
       <ModalPageEditorBackground
         open={openEditorBackground}
         onChangeOpen={(event) => setOpenEditorBackground(event)}
+        onChange={(event) => {
+          setOpenEditorBackground(false);
+          local.fm.data["cover_path"] = event?.path_origin;
+          local.fm.data["cover"] = event?.path;
+          local.fm.render();
+        }}
       />
       <Dialog open={open}>
         <DialogContent
@@ -69,6 +85,10 @@ export const ModalPageTask: FC<{
                 header={(fm: any) => {
                   return <></>;
                 }}
+                onInit={(fm: any) => {
+                  local.fm = fm;
+                  local.render();
+                }}
                 mode="view"
                 children={(fm: any) => {
                   return (
@@ -78,16 +98,37 @@ export const ModalPageTask: FC<{
                           <div className="flex items-center justify-center w-full">
                             <div
                               className={cx(
-                                "relative flex flex-col items-end justify-center w-full h-64 rounded-lg  bg-gray-50",
+                                "relative bg-gray-500 flex flex-col items-end justify-center w-full h-64 rounded-lg  bg-gray-50",
                                 css`
                                   background-image: url(${siteurl(
-                                    "/template-1.png"
+                                    fm?.data?.cover
                                   )});
                                   background-size: cover;
                                   background-position: center;
                                 `
                               )}
                             >
+                              {fm.mode !== "view" ? (
+                                <>
+                                  <div className="w-full flex-grow flex-row">
+                                    <ButtonBetter
+                                      tooltip="Edit Backgound"
+                                      variant="outline"
+                                      size="icon"
+                                      className="m-4"
+                                      onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        setOpenEditorBackground(true);
+                                      }}
+                                    >
+                                      <MdOutlineEdit className="text-xl" />
+                                    </ButtonBetter>
+                                  </div>
+                                </>
+                              ) : (
+                                <></>
+                              )}
                               <div className="w-full flex-grow flex-row"></div>
                               <div className="flex flex-row w-full p-4">
                                 <div
@@ -96,9 +137,29 @@ export const ModalPageTask: FC<{
                                   )}
                                 >
                                   <div className="flex-grow text-white grid gap-4 md:gap-6 md:grid-cols-2">
-                                    <div className="text-white text-2xl md:text-4xl">
-                                      {"NAMA TASK"}
-                                    </div>
+                                    {fm?.mode !== "view" ? (
+                                      <>
+                                        <div>
+                                          <Field
+                                            style="underline"
+                                            fm={fm}
+                                            name={"name"}
+                                            label={"title"}
+                                            type={"text"}
+                                            classField="text-white focus-within:border-b focus-within:border-b-white"
+                                            className="text-white placeholder:text-white text-2xl md:text-4xl"
+                                            hidden_label={true}
+                                            placeholder="Add title"
+                                          />
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <div className="text-white text-2xl md:text-4xl">
+                                          {fm?.data?.name}
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -116,43 +177,159 @@ export const ModalPageTask: FC<{
                             Details
                           </div>
                           <div className="flex flex-row flex-grow items-center justify-end gap-x-2">
-                            <Alert
-                              type={"save"}
-                              msg={"Are you sure you want to save this task?"}
-                              onClick={() => {
-                                fm.submit();
-                              }}
-                            >
-                              <ButtonContainer className={"bg-primary"}>
-                                Save
-                              </ButtonContainer>
-                            </Alert>
-                            <Alert
-                              type={"save"}
-                              msg={"Are you sure you want to revise this task?"}
-                              onClick={() => {
-                                fm.submit();
-                              }}
-                            >
-                              <ButtonContainer
-                                variant={"destructive"}
-                                className="bg-white border border-red-500 text-red-500"
-                              >
-                                <span className="text-red-500">Revised</span>
-                              </ButtonContainer>
-                            </Alert>
+                            {fm.mode === "view" ? (
+                              <>
+                                {fm?.data.kanban === "TO_DO" ? (
+                                  <>
+                                    <ButtonBetter
+                                      className={
+                                        "bg-primary  gap-x-2 flex flex-row"
+                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        local.backup = JSON.parse(
+                                          JSON.stringify(fm?.data)
+                                        );
+                                        local.render();
+                                        fm.mode = "form";
+                                        fm.render();
+                                      }}
+                                    >
+                                      <MdOutlineEdit className="text-xl" /> Edit
+                                    </ButtonBetter>
+                                  </>
+                                ) : (
+                                  <></>
+                                )}
+                                {fm?.data.kanban === "NEED_REVIEW" ? (
+                                  <>
+                                    <Alert
+                                      type={"save"}
+                                      msg={
+                                        "Are you sure you want to revise this task?"
+                                      }
+                                      onClick={async () => {
+                                        fm.data.kanban = "TO_DO";
+                                        fm.render();
+                                        await fm.submit();
+                                        if (typeof refresh === "function")
+                                          refresh();
+                                        onChangeOpen(false);
+                                      }}
+                                    >
+                                      <ButtonContainer
+                                        variant={"destructive"}
+                                        className="bg-white border border-red-500 text-red-500"
+                                      >
+                                        <span className="text-red-500">
+                                          Revised
+                                        </span>
+                                      </ButtonContainer>
+                                    </Alert>
 
-                            <Alert
-                              type={"save"}
-                              msg={
-                                "Are you sure you want to complete this task?"
-                              }
-                              onClick={() => {
-                                fm.submit();
-                              }}
-                            >
-                              <ButtonContainer>Complete</ButtonContainer>
-                            </Alert>
+                                    <Alert
+                                      type={"save"}
+                                      msg={
+                                        "Are you sure you want to complete this task?"
+                                      }
+                                      onClick={async () => {
+                                        fm.data.kanban = "COMPLETED";
+                                        fm.render();
+                                        await fm.submit();
+                                        if (typeof refresh === "function")
+                                          refresh();
+                                        onChangeOpen(false);
+                                      }}
+                                    >
+                                      <ButtonContainer>
+                                        Complete
+                                      </ButtonContainer>
+                                    </Alert>
+                                  </>
+                                ) : (
+                                  <></>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <Alert
+                                  type={"save"}
+                                  msg={
+                                    "Are you sure you want to save this task?"
+                                  }
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    await fm.submit();
+                                    setTimeout(() => {
+                                      console.log("waktunya reload?");
+                                    }, 100);
+                                  }}
+                                >
+                                  <ButtonContainer className={"bg-primary"}>
+                                    <div className="flex items-center gap-x-2">
+                                      <IoMdSave className="text-xl" /> Save
+                                    </div>
+                                  </ButtonContainer>
+                                </Alert>
+
+                                <Alert
+                                  type={"delete"}
+                                  msg={
+                                    "Are you sure you want to delete this record?"
+                                  }
+                                  onClick={async () => {
+                                    await actionToast({
+                                      task: async () => {
+                                        await apix({
+                                          port: "onboarding",
+                                          path: `/api/employee-tasks/${fm?.data?.id}`,
+                                          method: "delete",
+                                        });
+                                        if (typeof refresh === "function")
+                                          await refresh();
+                                      },
+                                      after: () => {
+                                        // navigate(urlPage);
+                                        onChangeOpen(false);
+                                      },
+                                      msg_load: "Delete ",
+                                      msg_error: "Delete failed ",
+                                      msg_succes: "Delete success ",
+                                    });
+                                  }}
+                                >
+                                  <ButtonContainer variant={"destructive"}>
+                                    <MdDelete className="text-xl" />
+                                    Delete
+                                  </ButtonContainer>
+                                </Alert>
+                                <Alert
+                                  type={"save"}
+                                  msg={
+                                    "Any unsaved changes will be reverted to the last saved data. Are you sure you want to view this task?"
+                                  }
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    fm.mode = "view";
+                                    fm.data = { ...local.backup };
+                                    fm.render();
+                                  }}
+                                >
+                                  <ButtonContainer
+                                    className={
+                                      "bg-primary gap-x-2 flex flex-row"
+                                    }
+                                  >
+                                    <div className="flex items-center gap-x-2">
+                                      <IoEye className="text-lg" /> View
+                                    </div>
+                                  </ButtonContainer>
+                                </Alert>
+                              </>
+                            )}
                           </div>
                         </div>
                         <div className={cx("w-full flex flex-row")}>
@@ -248,36 +425,115 @@ export const ModalPageTask: FC<{
                             <MdChecklist className="text-xl" />
                             Checklists
                           </div>
-                          <div className="flex flex-row flex-grow items-center justify-end gap-x-2"></div>
+                          <div className="flex flex-row flex-grow items-center justify-end gap-x-2">
+                            {fm?.mode !== "view" ? (
+                              <ButtonBetter
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  const data =
+                                    fm?.data?.employee_task_checklists || [];
+                                  data.push({});
+                                  fm.data.employee_task_checklists = data;
+                                  fm.render();
+                                }}
+                              >
+                                <HiPlus className="text-xl" />
+                                Add
+                              </ButtonBetter>
+                            ) : (
+                              <></>
+                            )}
+                          </div>
                         </div>
+                        {fm?.mode === "view" ? (
+                          <>
+                            <div className="flex flex-row relative items-center gap-x-2">
+                              <div className="flex flex-grow items-center flex-row ">
+                                <Progress
+                                  value={getNumber(fm?.data?.progress)}
+                                  className={cx(
+                                    `w-full h-5 bg-gray-300 rounded-md`
+                                  )}
+                                  classNameIndicator={"rounded-md"}
+                                />
+                              </div>
+                              <div className="text-md text-primary flex flex-row font-bold">
+                                {getNumber(fm?.data?.progress)}%
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
 
-                        <div className="flex flex-row relative items-center gap-x-2">
-                          <div className="flex flex-grow items-center flex-row ">
-                            <Progress
-                              value={80}
-                              className={cx(
-                                `w-full h-5 bg-gray-300 rounded-md`
-                              )}
-                              classNameIndicator={"rounded-md"}
-                            />
-                          </div>
-                          <div className="text-md text-primary flex flex-row font-bold">
-                            10%
-                          </div>
-                        </div>
-                        {fm?.data?.template_task_checklists?.length ? (
+                        {fm?.data?.employee_task_checklists?.length ? (
                           <>
                             <div className={cx("w-full flex flex-col gap-y-2")}>
-                              {fm?.data?.template_task_checklists.map(
+                              {fm?.data?.employee_task_checklists.map(
                                 (e: any, idx: number) => {
                                   let fm_row = cloneFM(fm, e);
+                                  if (fm?.mode !== "view")
+                                    return (
+                                      <div
+                                        className="w-96 max-w-full"
+                                        key={`question_${idx}`}
+                                      >
+                                        <Field
+                                          classField={css`
+                                            .suffix {
+                                              background: transparent;
+                                            }
+                                          `}
+                                          style="underline"
+                                          fm={fm_row}
+                                          name={"name"}
+                                          label={"option"}
+                                          hidden_label={true}
+                                          type={"text"}
+                                          placeholder="Add Option"
+                                          prefix={
+                                            <div className="text-md flex flex-row items-center font-bold text-gray-500">
+                                              <Checkbox
+                                                className="border border-primary"
+                                                checked={false}
+                                                onClick={(e) => {}}
+                                              />{" "}
+                                            </div>
+                                          }
+                                          suffix={
+                                            <div
+                                              className=" p-2 rounded-lg cursor-pointer items-center flex flex-row"
+                                              onClick={() => {
+                                                if (
+                                                  Array.isArray(
+                                                    fm.data
+                                                      .employee_task_checklists
+                                                  )
+                                                ) {
+                                                  fm.data.employee_task_checklists =
+                                                    fm.data.employee_task_checklists.filter(
+                                                      (_: any, i: any) =>
+                                                        i !== idx
+                                                    );
+                                                  fm.render();
+                                                }
+                                              }}
+                                            >
+                                              <MdDelete className="w-4 h-4 text-red-500" />
+                                            </div>
+                                          }
+                                        />
+                                      </div>
+                                    );
+                                  const is_checked = e?.is_checked === "YES";
                                   return (
                                     <div
                                       className="w-full flex flex-row items-center "
                                       key={`question_${idx}`}
                                     >
                                       <div className="flex flex-row items-center flex-grow">
-                                        {true ? (
+                                        {is_checked ? (
                                           <div className="text-primary">
                                             <svg
                                               xmlns="http://www.w3.org/2000/svg"
@@ -309,14 +565,39 @@ export const ModalPageTask: FC<{
                                         <div>{e?.name}</div>
                                       </div>
                                       <div className="flex flex-row items-center">
-                                        {true ? (
+                                        {!e?.verified_by ? (
                                           <div
                                             className={cx(
                                               "px-2 py-1 text-xs rounded-md",
-                                              true
-                                                ? "bg-gray-500  text-white"
-                                                : "bg-primary cursor-pointer text-white"
+                                              is_checked
+                                                ? "bg-primary cursor-pointer text-white"
+                                                : "bg-gray-500  text-white"
                                             )}
+                                            onClick={() => {
+                                              if (is_checked) {
+                                                fm.data.employee_task_checklists[
+                                                  idx
+                                                ].verified_by =
+                                                  get_user("employee.id");
+                                                fm.render();
+                                                const data =
+                                                  fm?.data
+                                                    ?.employee_task_checklists;
+                                                const check = data.filter(
+                                                  (e: any) => e?.verified_by
+                                                );
+                                                const progress = Math.ceil(
+                                                  (check?.length /
+                                                    data?.length) *
+                                                    100
+                                                );
+                                                fm.data.progress =
+                                                  progress > 100
+                                                    ? 100
+                                                    : progress;
+                                                fm.render();
+                                              }
+                                            }}
                                           >
                                             Verify
                                           </div>
@@ -330,37 +611,6 @@ export const ModalPageTask: FC<{
                                           </div>
                                         )}
                                       </div>
-                                      {/* <Field
-                                        classField={css`
-                                          .suffix {
-                                            background: transparent;
-                                          }
-                                        `}
-                                        style="underline"
-                                        fm={fm_row}
-                                        name={"name"}
-                                        label={"option"}
-                                        hidden_label={true}
-                                        type={"text"}
-                                        placeholder="Add Option"
-                                        prefix={
-                                          <div className="text-md flex flex-row items-center font-bold text-gray-500">
-                                            <Checkbox
-                                              className="border border-primary"
-                                              checked={false}
-                                              onClick={(e) => {}}
-                                            />{" "}
-                                          </div>
-                                        }
-                                        suffix={
-                                          <div
-                                            className=" p-2 rounded-lg cursor-pointer items-center flex flex-row"
-                                            onClick={() => {
-                                              fm.render();
-                                            }}
-                                          ></div>
-                                        }
-                                      /> */}
                                     </div>
                                   );
                                 }
@@ -392,6 +642,34 @@ export const ModalPageTask: FC<{
                           </div>
                         </div>
 
+                        <div className="flex items-center w-full">
+                          <Field
+                            fm={fm}
+                            hidden_label={true}
+                            name={"employee_task_attachments"}
+                            label={"Description"}
+                            type={"multi-upload"}
+                            valueKey={"path"}
+                            onChange={async () => {}}
+                            onDelete={async (item) => {
+                              if (item?.id) {
+                                await actionToast({
+                                  task: async () => {
+                                    await apix({
+                                      port: "onboarding",
+                                      path: `/api/employee-task-attachments/${item?.id}`,
+                                      method: "delete",
+                                    });
+                                  },
+                                  after: () => {},
+                                  msg_load: "Delete Files ",
+                                  msg_error: "Delete Files failed ",
+                                  msg_succes: "Delete Files success ",
+                                });
+                              }
+                            }}
+                          />
+                        </div>
                         <div
                           className={cx(
                             "w-full flex flex-row border-b border-gray-300 pb-1"
@@ -401,6 +679,20 @@ export const ModalPageTask: FC<{
                             <IoCameraOutline className="text-xl" />
                             Proof
                           </div>
+                        </div>
+                        <div className="flex items-center w-full">
+                          {fm?.data?.proof ? (
+                            <Field
+                              fm={fm}
+                              disabled={true}
+                              hidden_label={true}
+                              name={"proof"}
+                              label={"Description"}
+                              type={"upload"}
+                            />
+                          ) : (
+                            <></>
+                          )}
                         </div>
                       </div>
                     </>

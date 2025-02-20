@@ -14,10 +14,12 @@ import { useEffect } from "react";
 import { IoMdSave } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
 import { actionToast } from "@/lib/utils/action";
+import { normalDate } from "@/lib/utils/date";
+import { events } from "@/lib/utils/event";
 
 function Page() {
   const id = getParams("id");
-  const labelPage = "Document Checking";
+  const labelPage = "Events";
   const urlPage = `/d/master-data/document-checking`;
   const local = useLocal({
     can_edit: false,
@@ -78,7 +80,7 @@ function Page() {
                     task: async () => {
                       await apix({
                         port: "recruitment",
-                        path: `/api/job-postings/${id}`,
+                        path: `/api/events/${id}`,
                         method: "delete",
                       });
                     },
@@ -101,24 +103,56 @@ function Page() {
         );
       }}
       onSubmit={async (fm: any) => {
-        await apix({
-          port: "recruitment",
+        const result = {
+          ...fm.data,
+          start_date: normalDate(fm?.data?.start_date),
+          end_date: normalDate(fm?.data?.end_date),
+          event_employees: fm.data.employees?.length
+            ? fm.data.employees.map((e: any) => {
+                if (e?.check) {
+                  return {
+                    ...e,
+                    id: e?.id_event_employee,
+                    employee_id: e?.id,
+                  };
+                }
+                return {
+                  employee_id: e?.id,
+                };
+              })
+            : [],
+        };
+        const res = await apix({
+          port: "onboarding",
           value: "data.data",
-          path: "/api/document-verifications",
+          path: "/api/events",
           method: "put",
           data: {
-            ...fm.data,
+            ...result,
           },
         });
       }}
       onLoad={async () => {
         const data: any = await apix({
-          port: "recruitment",
+          port: "onboarding",
           value: "data.data",
-          path: `/api/document-verifications/${id}`,
+          path: `/api/events/${id}`,
           validate: "object",
         });
-        return data;
+        return {
+          ...data,
+          employees: data?.event_employees?.length
+            ? data.event_employees.map((e: any) => {
+                return {
+                  ...e,
+                  check: true,
+                  id_event_employee: e?.id,
+                  id: e?.employee_id,
+                  name: e?.employee_name,
+                };
+              })
+            : [],
+        };
       }}
       showResize={false}
       header={(fm: any) => {
@@ -130,27 +164,26 @@ function Page() {
             <div className={"flex flex-col flex-wrap px-4 py-2"}>
               <div className="grid gap-4 mb-4 md:gap-6 md:grid-cols-2 sm:mb-8">
                 <div>
-                  <Field fm={fm} name={"name"} label={"Name"} type={"text"} />
-                </div>
-                <div>
                   <Field
                     fm={fm}
-                    name={"format"}
-                    label={"Format"}
+                    name={"name"}
+                    label={"Event Name"}
                     type={"text"}
+                    required={true}
                   />
                 </div>
                 <div>
                   <Field
                     fm={fm}
-                    name={"template_question_id"}
-                    label={"Template"}
+                    name={"template_task_id"}
+                    label={"Task"}
                     type={"dropdown"}
+                    required={true}
                     onLoad={async () => {
                       const res: any = await apix({
-                        port: "recruitment",
-                        value: "data.data.template_questions",
-                        path: "/api/template-questions",
+                        port: "onboarding",
+                        value: "data.data.data",
+                        path: "/api/template-tasks",
                         validate: "dropdown",
                         keys: {
                           label: "name",
@@ -158,6 +191,53 @@ function Page() {
                       });
                       return res;
                     }}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
+                    name={"start_date"}
+                    label={"Start Date"}
+                    type={"date"}
+                    required={true}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
+                    name={"end_date"}
+                    label={"Due Date"}
+                    type={"date"}
+                    required={true}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
+                    name={"employees"}
+                    label={"Assignees"}
+                    type={"multi-async"}
+                    required={true}
+                    onLoad={async (param: any) => {
+                      const params = await events("onload-param", param);
+                      const result: any = await apix({
+                        port: "portal",
+                        value: "data.data.employees",
+                        path: `/api/employees${params}`,
+                        validate: "array",
+                      });
+                      return result;
+                    }}
+                    onValue={(option) => option.id}
+                    onLabel={(option) => option.name}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Field
+                    fm={fm}
+                    name={"description"}
+                    label={"Noted"}
+                    type={"textarea"}
                   />
                 </div>
               </div>

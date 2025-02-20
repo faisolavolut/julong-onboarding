@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 interface RootLayoutProps {
   children: React.ReactNode;
 }
-const permision = ["read-event"];
+const permision = ["read-events"];
 
 const ValidateLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const [isClient, setIsClient] = useState(false);
@@ -44,7 +44,7 @@ const ValidateLayout: React.FC<RootLayoutProps> = ({ children }) => {
     );
   if (!local.access) notFound();
   return (
-    <main className=" p-4 pb-0 pt-0 pr-6 pl-3 flex-grow flex flex-col">
+    <main className=" p-4 pb-3 pt-0 pr-6 pl-3 flex-grow flex flex-col">
       {children}
     </main>
   );

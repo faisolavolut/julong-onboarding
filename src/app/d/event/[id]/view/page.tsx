@@ -1,22 +1,18 @@
 "use client";
-
 import { getParams } from "@/lib/utils/get-params";
 
 import { Field } from "@/lib/components/form/Field";
 import { FormBetter } from "@/lib/components/form/FormBetter";
-import { Alert } from "@/lib/components/ui/alert";
 import { BreadcrumbBetterLink } from "@/lib/components/ui/breadcrumb-link";
-import { ButtonContainer } from "@/lib/components/ui/button";
 import { apix } from "@/lib/utils/apix";
 import { useLocal } from "@/lib/utils/use-local";
 import { notFound } from "next/navigation";
 import { useEffect } from "react";
-import { IoMdSave } from "react-icons/io";
-import { MdDelete } from "react-icons/md";
+import { events } from "@/lib/utils/event";
 
 function Page() {
   const id = getParams("id"); // Replace this with dynamic id retrieval
-  const labelPage = "Document Checking";
+  const labelPage = "Events";
   const urlPage = `/d/master-data/document-checking`;
   const local = useLocal({
     can_edit: false,
@@ -90,22 +86,71 @@ function Page() {
             <div className={"flex flex-col flex-wrap px-4 py-2"}>
               <div className="grid gap-4 mb-4 md:gap-6 md:grid-cols-2 sm:mb-8">
                 <div>
-                  <Field fm={fm} name={"name"} label={"Name"} type={"text"} />
-                </div>
-                <div>
                   <Field
                     fm={fm}
-                    name={"format"}
-                    label={"Format"}
-                    type={"text"}
+                    name={"start_date"}
+                    label={"Start Date"}
+                    type={"date"}
+                    required={true}
                   />
                 </div>
                 <div>
                   <Field
                     fm={fm}
-                    name={"template_name"}
-                    label={"Template"}
-                    type={"text"}
+                    name={"end_date"}
+                    label={"Due Date"}
+                    type={"date"}
+                    required={true}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
+                    name={"template_task_id"}
+                    label={"Task"}
+                    type={"dropdown"}
+                    required={true}
+                    onLoad={async () => {
+                      const res: any = await apix({
+                        port: "onboarding",
+                        value: "data.data.data",
+                        path: "/api/template-tasks",
+                        validate: "dropdown",
+                        keys: {
+                          label: "name",
+                        },
+                      });
+                      return res;
+                    }}
+                  />
+                </div>
+                <div>
+                  <Field
+                    fm={fm}
+                    name={"employees"}
+                    label={"Assignees"}
+                    type={"multi-async"}
+                    required={true}
+                    onLoad={async (param: any) => {
+                      const params = await events("onload-param", param);
+                      const result: any = await apix({
+                        port: "portal",
+                        value: "data.data.employees",
+                        path: `/api/employees${params}`,
+                        validate: "array",
+                      });
+                      return result;
+                    }}
+                    onValue={(option) => option.id}
+                    onLabel={(option) => option.name}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Field
+                    fm={fm}
+                    name={"description"}
+                    label={"Noted"}
+                    type={"textarea"}
                   />
                 </div>
               </div>
