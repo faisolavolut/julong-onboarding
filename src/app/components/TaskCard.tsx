@@ -2,6 +2,7 @@ import { getStatusLabel } from "@/constants/status-mpp";
 import ImageBetter from "@/lib/components/ui/Image";
 import { Progress } from "@/lib/components/ui/Progress";
 import { dayDate } from "@/lib/utils/date";
+import { getNumber } from "@/lib/utils/getNumber";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useState } from "react";
 import { LuCalendarDays } from "react-icons/lu";
@@ -11,7 +12,7 @@ export const TaskCard: React.FC<{
   render?: () => void;
   onClick?: (item: any) => void;
 }> = ({ data, hidden_save, render, onClick }) => {
-  const progress = 50;
+  const progress = getNumber(data?.progress_verified);
   const [favorite, setFavorite] = useState(data?.is_saved ? true : false);
   const [isZooming, setIsZooming] = useState(false);
   const handleClick = () => {
@@ -30,7 +31,7 @@ export const TaskCard: React.FC<{
       <div className="flex justify-between items-center">
         <div className="w-full h-28">
           <ImageBetter
-            src={siteurl(data?.CoverPath)}
+            src={siteurl(data?.cover_path)}
             alt="John Cena"
             className=" w-full h-full object-cover object-right"
             defaultSrc={siteurl("/404-img.jpg")}

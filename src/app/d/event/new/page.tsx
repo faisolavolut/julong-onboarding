@@ -11,7 +11,6 @@ import { useLocal } from "@/lib/utils/use-local";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoMdSave } from "react-icons/io";
-import { components } from "react-select";
 
 function Page() {
   const [value, onChange] = useState<readonly any[]>([]);
@@ -217,19 +216,4 @@ function Page() {
     />
   );
 }
-const MultiValue = (props: any) => {
-  return (
-    <components.MultiValue
-      {...props}
-      className={cx(
-        "selected-multi-value rounded-lg  bg-gray-200",
-        css`
-          border-radius: 6px !important;
-        `
-      )}
-    >
-      {props.children}
-    </components.MultiValue>
-  );
-};
 export default Page;
