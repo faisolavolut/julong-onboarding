@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y git && apt-get clean
 RUN git clone https://github.com/faisolavolut/julong-lib.git src/lib
 
 COPY package.json package-lock.json ./
+
+COPY src/lib/package*.json src/lib/
+
 # Install dependencies
 RUN npm install
 
