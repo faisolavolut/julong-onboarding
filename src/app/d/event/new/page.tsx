@@ -143,22 +143,25 @@ function Page() {
                 <div>
                   <Field
                     fm={fm}
-                    name={"template_task_id"}
-                    label={"Task"}
-                    type={"dropdown"}
-                    required={true}
-                    onLoad={async () => {
+                    target={"template_task_id"}
+                    name={"template_task"}
+                    label={"Template"}
+                    type={"dropdown-async"}
+                    onLoad={async (param: any) => {
+                      const params = await events("onload-param", param);
+
                       const res: any = await apix({
                         port: "onboarding",
                         value: "data.data.data",
-                        path: "/api/template-tasks",
-                        validate: "dropdown",
+                        path: `/api/template-tasks${params}`,
+                        validate: "array",
                         keys: {
                           label: "name",
                         },
                       });
                       return res;
                     }}
+                    onLabel={"name"}
                   />
                 </div>
                 <div>
