@@ -125,7 +125,7 @@ function Page() {
         const res = await apix({
           port: "onboarding",
           value: "data.data",
-          path: "/api/events",
+          path: "/api/events/update",
           method: "put",
           data: {
             ...result,
