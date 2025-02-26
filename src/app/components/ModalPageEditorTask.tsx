@@ -225,17 +225,6 @@ export const ModalPageEditorTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
-                                name={"due_duration"}
-                                label={"Due Duration"}
-                                type={"money"}
-                                suffix={() => (
-                                  <div className="text-sm px-2">Day</div>
-                                )}
-                              />
-                            </div>
-                            <div>
-                              <Field
-                                fm={fm}
                                 name={"priority"}
                                 label={"Priority"}
                                 type={"dropdown"}

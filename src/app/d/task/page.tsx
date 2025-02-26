@@ -40,49 +40,50 @@ function Page() {
       column={[
         {
           name: "name",
-          header: () => <span>Name</span>,
+          header: "Name",
           renderCell: ({ row, name }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "total_task",
-          header: () => <span>Total Task</span>,
+          header: "Total Task",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
           name: "todo",
-          header: () => <span>To Do</span>,
+          header: "To Do",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
           name: "in_progress",
-          header: () => <span>In Progress</span>,
+          header: "In Progress",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
           name: "need_review",
-          header: () => <span>Need Review</span>,
+          header: "Need Review",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
           name: "completed",
-          header: () => <span>Completed</span>,
+          header: "Completed",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row }: any) => {
             // const id = row?.id || "858451f3-ac12-4a5c-be9f-411765b70802";

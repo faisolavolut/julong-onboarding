@@ -2,7 +2,6 @@ import { ButtonLink } from "@/lib/components/ui/button-link";
 import { shortDate } from "@/lib/utils/date";
 import { getAccess } from "@/lib/utils/getAccess";
 import { getValue } from "@/lib/utils/getValue";
-import get from "lodash.get";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { IoEye } from "react-icons/io5";
 import { getStatusLabel } from "./status-mpp";
@@ -55,35 +54,36 @@ export const columnMpr = (data: any) => {
       return [
         {
           name: "document_number",
-          header: () => <span>Document Number</span>,
+          header: "Document Number",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "document_date",
-          header: () => <span>Document Date</span>,
+          header: "Document Date",
           renderCell: ({ row, name, cell }: any) => {
             return <>{shortDate(new Date())}</>;
           },
         },
         {
           name: "job_name",
-          header: () => <span>Job Requested</span>,
+          header: "Job Requested",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "status",
-          header: () => <span>Status</span>,
+          header: "Status",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getStatusLabel(getValue(row, name))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row, name, cell }: any) => {
             return (
@@ -118,35 +118,36 @@ export const columnMpr = (data: any) => {
       return [
         {
           name: "organization_location_name",
-          header: () => <span>Location</span>,
+          header: "Location",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "document_number",
-          header: () => <span>Document Number</span>,
+          header: "Document Number",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "job_name",
-          header: () => <span>Job Requested</span>,
+          header: "Job Requested",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "status",
-          header: () => <span>Status</span>,
+          header: "Status",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getStatusLabel(getValue(row, name))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row, name, cell }: any) => {
             return (
@@ -181,42 +182,43 @@ export const columnMpr = (data: any) => {
       return [
         {
           name: "organization_location_name",
-          header: () => <span>Location</span>,
+          header: "Location",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "for_organization_structure",
-          header: () => <span>Department</span>,
+          header: "Department",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "document_number",
-          header: () => <span>Document Number</span>,
+          header: "Document Number",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "job_name",
-          header: () => <span>Job Requested</span>,
+          header: "Job Requested",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "status",
-          header: () => <span>Status</span>,
+          header: "Status",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getStatusLabel(getValue(row, name))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row, name, cell }: any) => {
             return (
@@ -239,42 +241,43 @@ export const columnMpr = (data: any) => {
       return [
         {
           name: "organization_name",
-          header: () => <span>Organization</span>,
+          header: "Organization",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "organization_location_name",
-          header: () => <span>Location</span>,
+          header: "Location",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "document_number",
-          header: () => <span>Document Number</span>,
+          header: "Document Number",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "job_name",
-          header: () => <span>Job Requested</span>,
+          header: "Job Requested",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "status",
-          header: () => <span>Status</span>,
+          header: "Status",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getStatusLabel(getValue(row, name))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row, name, cell }: any) => {
             return (
@@ -297,49 +300,50 @@ export const columnMpr = (data: any) => {
       return [
         {
           name: "document_number",
-          header: () => <span>Document Number</span>,
+          header: "Document Number",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "document_date",
-          header: () => <span>Document Date</span>,
+          header: "Document Date",
           renderCell: ({ row, name, cell }: any) => {
             return <>{shortDate(new Date())}</>;
           },
         },
         {
           name: "organization_name",
-          header: () => <span>Organization</span>,
+          header: "Organization",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "requestor_name",
-          header: () => <span>Requestor</span>,
+          header: "Requestor",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "job_name",
-          header: () => <span>Job Requested</span>,
+          header: "Job Requested",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "status",
-          header: () => <span>Status</span>,
+          header: "Status",
           renderCell: ({ row, name, cell }: any) => {
             return <>{getStatusLabel(getValue(row, name))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row, name, cell }: any) => {
             return (

@@ -51,28 +51,41 @@ function Page() {
       column={[
         {
           name: "name",
-          header: () => <span>Event Name</span>,
+          header: "Event Name",
           renderCell: ({ row, name }: any) => {
             return <>{getValue(row, name)}</>;
           },
         },
         {
           name: "end_date",
-          header: () => <span>Due Date</span>,
+          type: "date",
+          header: "Due Date",
           renderCell: ({ row, name }: any) => {
             return <>{dayDate(getValue(row, name))}</>;
           },
         },
         {
           name: "status",
-          header: () => <span>Status</span>,
+          header: "Status",
+          onLoadFilter: async (params) => {
+            return [
+              { label: "Upcoming", value: "UPCOMING" },
+              { label: "Ongoing", value: "ONGOING" },
+              { label: "Completed", value: "COMPLETED" },
+            ];
+          },
+          onLabel: "label",
+          onValue: "value",
+          pagination: false,
+          search: "local",
           renderCell: ({ row, name }: any) => {
             return <>{getStatusLabel(getValue(row, name))}</>;
           },
         },
         {
           name: "action",
-          header: () => <span>Action</span>,
+          header: "Action",
+          filter: false,
           sortable: false,
           renderCell: ({ row }: any) => {
             return (
