@@ -65,7 +65,9 @@ export const ModalPageTask: FC<{
       />
       <Dialog open={open}>
         <DialogContent
-          className={cx(" flex flex-col w-screen h-screen max-w-screen")}
+          className={cx(
+            " flex flex-col w-screen h-screen md:w-3/4 md:h-5/6 max-w-screen"
+          )}
           onClick={() => {
             onChangeOpen(false);
           }}

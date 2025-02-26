@@ -148,7 +148,10 @@ function Page() {
                     label={"Template"}
                     type={"dropdown-async"}
                     onLoad={async (param: any) => {
-                      const params = await events("onload-param", param);
+                      const params = await events("onload-param", {
+                        ...param,
+                        status: "ACTIVE",
+                      });
 
                       const res: any = await apix({
                         port: "onboarding",
@@ -190,7 +193,10 @@ function Page() {
                     type={"multi-async"}
                     required={true}
                     onLoad={async (param: any) => {
-                      const params = await events("onload-param", param);
+                      const params = await events("onload-param", {
+                        ...param,
+                        is_onboarding: "NO",
+                      });
                       const result: any = await apix({
                         port: "portal",
                         value: "data.data.employees",

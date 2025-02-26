@@ -63,7 +63,9 @@ export const ModalPageEditorBackground: FC<{
     <>
       <Dialog open={open}>
         <DialogContent
-          className={cx(" flex flex-col w-screen h-screen max-w-7xl")}
+          className={cx(
+            " flex flex-col w-screen h-screen md:w-3/4 md:h-5/6 max-w-screen"
+          )}
           onClick={() => {
             onChangeOpen(false);
           }}
@@ -106,6 +108,7 @@ export const ModalPageEditorBackground: FC<{
                 <>
                   <ListUIClean
                     name="themes"
+                    classContainer="border-none"
                     content={({ item }: any) => {
                       return (
                         <>

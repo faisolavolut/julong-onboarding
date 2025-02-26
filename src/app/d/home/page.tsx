@@ -1,15 +1,17 @@
 "use client";
 import { CardBetter } from "@/lib/components/ui/card";
 import ImageBetter from "@/lib/components/ui/Image";
-import { get_user } from "@/lib/utils/get_user";
+import { apix } from "@/lib/utils/apix";
 import { getAccess, userRoleMe } from "@/lib/utils/getAccess";
 import { siteurl } from "@/lib/utils/siteurl";
 import { useLocal } from "@/lib/utils/use-local";
+import get from "lodash.get";
 import { useEffect } from "react";
 
 function Page() {
   const local = useLocal({
     can_approve: false,
+    profile: null as any,
     recruitment_target: {
       count: 5000,
       percent: 70,
@@ -57,6 +59,19 @@ function Page() {
     const run = async () => {
       const roles = await userRoleMe();
       local.can_approve = getAccess("approval-verification-profile", roles);
+      try {
+        const res = await apix({
+          port: "portal",
+          value: "data.data",
+          path: "/api/users/me",
+          method: "get",
+        });
+        console.log({ res });
+        local.profile = {
+          ...res,
+          verif: res?.verified_user_profile !== "ACTIVE" ? false : true,
+        };
+      } catch (ex) {}
       local.render();
     };
     run();
@@ -79,26 +94,28 @@ function Page() {
                     )}
                   ></div> */}
                   <ImageBetter
-                    src={siteurl(
-                      get_user("profile.avatar")
-                        ? get_user("profile.avatar")
-                        : get_user("photo")
-                    )}
+                    src={siteurl(get(local.profile, "user_profile.avatar"))}
                     alt="Profile"
                     className="sm:w-48 sm:h-48 md:h-64 md:w-64 rounded-full object-cover"
-                    defaultSrc={siteurl("/bean.webp")}
+                    defaultSrc={siteurl(
+                      get(local.profile, "user_profile.gender") === "FEMALE"
+                        ? "/default-avatar-women.jpeg"
+                        : "/default-avatar.webp"
+                    )}
                   />
                 </div>
                 <h2 className="text-lg font-bold mt-4">Account</h2>
                 <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">
-                    <p className="text-gray-600 ">Username</p>
-                    <p className="text-gray-800 font-bold">Mihyla2819</p>
+                    <p className="text-gray-600 ">Name</p>
+                    <p className="text-gray-800 font-bold">
+                      {get(local.profile, "name")}
+                    </p>
                   </div>
                   <div className="mt-2 w-full text-left  flex flex-grow justify-between">
                     <p className="text-gray-600 ">Email</p>
                     <p className="text-gray-600 font-bold">
-                      mihyla828@gmail.com
+                      {get(local.profile, "email")}
                     </p>
                   </div>
                 </div>
@@ -112,15 +129,24 @@ function Page() {
                 <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Organization</p>
-                    <p className="text-gray-800 font-bold">Organization</p>
+                    <p className="text-gray-800 font-bold">
+                      {get(local.profile, "employee.organization.name")}
+                    </p>
                   </div>
                   <div className="mt-2 w-full text-left  flex flex-grow justify-between">
                     <p className="text-gray-600 ">Company</p>
-                    <p className="text-gray-600 font-bold">PT Makmur Jaya</p>
+                    <p className="text-gray-600 font-bold">
+                      {get(
+                        local.profile,
+                        "employee.employee_job.emp_organization.name"
+                      )}
+                    </p>
                   </div>
                   <div className="mt-2 w-full text-left  flex flex-grow justify-between">
                     <p className="text-gray-600 ">Position</p>
-                    <p className="text-gray-600 font-bold">Business Anlayst</p>
+                    <p className="text-gray-600 font-bold">
+                      {get(local.profile, "employee.employee_job.job.name")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -133,24 +159,32 @@ function Page() {
                 <div className="flex flex-col relative text-sm">
                   <div className="mt-4 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Name</p>
-                    <p className="text-gray-800 font-bold">Mihyla Sudin</p>
+                    <p className="text-gray-800 font-bold">
+                      {get(local.profile, "employee.name")}
+                    </p>
                   </div>
-                  <div className="mt-2 w-full text-left flex flex-grow justify-between">
+                  {/* <div className="mt-2 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">ID Employee</p>
-                    <p className="text-gray-800 font-bold">287491929</p>
+                    <p className="text-gray-800 font-bold">
+                      {get(local.profile, "employee.name")}
+                    </p>
                   </div>
                   <div className="mt-2 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">No KTP</p>
-                    <p className="text-gray-800 font-bold">73729192010027</p>
-                  </div>
+                    <p className="text-gray-800 font-bold">
+                      {get(local.profile, "employee.name")}
+                    </p>
+                  </div> */}
                   <div className="mt-2 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Mobile Phone</p>
-                    <p className="text-gray-800 font-bold">082641892914</p>
+                    <p className="text-gray-800 font-bold">
+                      {get(local.profile, "employee.mobile_phone")}
+                    </p>
                   </div>
                   <div className="mt-2 w-full text-left flex flex-grow justify-between">
                     <p className="text-gray-600 ">Address</p>
                     <p className="text-gray-800 font-bold">
-                      Jl. Sudirman no 294
+                      {get(local.profile, "user_profile.address")}
                     </p>
                   </div>
                 </div>
