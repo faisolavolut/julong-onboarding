@@ -20,7 +20,7 @@ import { events } from "@/lib/utils/event";
 function Page() {
   const id = getParams("id");
   const labelPage = "Events";
-  const urlPage = `/d/master-data/document-checking`;
+  const urlPage = `/d/event`;
   const local = useLocal({
     can_edit: false,
     ready: false as boolean,
