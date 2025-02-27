@@ -13,7 +13,7 @@ import { ModalPageTemplateTask } from "@/app/components/ModalPageTemplateTask";
 import { events } from "@/lib/utils/event";
 import { actionToast } from "@/lib/utils/action";
 import { get_params_url } from "@/lib/utils/getParamsUrl";
-
+import { InputSearch } from "@/lib/components/ui/input-search";
 function Page() {
   const [isClient, setIsClient] = useState(false);
   const [open, setOpen] = useState(false);
@@ -22,6 +22,7 @@ function Page() {
     open: false,
     ready: false,
     access: true,
+    search: null as any,
     selected: null as any,
     data: [] as any[],
     count: 0,
@@ -36,6 +37,7 @@ function Page() {
             const params = await events("onload-param", {
               paging: local.page,
               take: take,
+              search: local.search,
             });
             const res = await apix({
               port: "onboarding",
@@ -44,11 +46,15 @@ function Page() {
               method: "get",
               validate: "array",
             });
-
+            const paramCount = await events("onload-param", {
+              paging: 1,
+              take: 1,
+              search: local.search,
+            });
             const count = await apix({
               port: "onboarding",
               value: "data.data.meta.total",
-              path: `/api/template-tasks?page=1&page_size=1`,
+              path: `/api/template-tasks${paramCount}`,
               method: "get",
             });
             local.data = res;
@@ -158,7 +164,30 @@ function Page() {
             Add New
           </ButtonBetter>
         </div>
-        <div className="flex flex-grow"></div>
+        <div className="flex flex-grow justify-end">
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await local.reload();
+            }}
+          >
+            <div className="relative  lg:w-56">
+              <InputSearch
+                className="bg-white search "
+                id="users-search"
+                name="users-search"
+                placeholder={`Search`}
+                delay={1000}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  local.search = value;
+                  local.render();
+                  local.reload();
+                }}
+              />
+            </div>
+          </form>
+        </div>
       </div>
       <div className="flex flex-col flex-grow px-2 pb-2">
         {local.ready ? (

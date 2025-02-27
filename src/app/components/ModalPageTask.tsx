@@ -339,6 +339,7 @@ export const ModalPageTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
+                                required={true}
                                 name={"start_date"}
                                 label={"Start Date"}
                                 type={"date"}
@@ -347,6 +348,7 @@ export const ModalPageTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
+                                required={true}
                                 name={"end_date"}
                                 label={"Due Date"}
                                 type={"date"}
@@ -355,20 +357,12 @@ export const ModalPageTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
-                                name={"due_duration"}
-                                label={"Due Duration"}
-                                type={"money"}
-                                suffix={() => (
-                                  <div className="text-sm px-2">Day</div>
-                                )}
-                              />
-                            </div>
-                            <div>
-                              <Field
-                                fm={fm}
+                                required={true}
                                 name={"priority"}
                                 label={"Priority"}
-                                type={"dropdown"}
+                                type={"dropdown-async"}
+                                pagination={false}
+                                search="local"
                                 onLoad={async () => {
                                   return [
                                     {
@@ -385,15 +379,20 @@ export const ModalPageTask: FC<{
                                     },
                                   ];
                                 }}
+                                onLabel={"label"}
+                                onValue={"value"}
                               />
                             </div>
 
                             <div>
                               <Field
                                 fm={fm}
+                                required={true}
                                 name={"status"}
                                 label={"Status"}
-                                type={"dropdown"}
+                                type={"dropdown-async"}
+                                pagination={false}
+                                search="local"
                                 onLoad={async () => {
                                   return [
                                     {
@@ -406,6 +405,8 @@ export const ModalPageTask: FC<{
                                     },
                                   ];
                                 }}
+                                onLabel={"label"}
+                                onValue={"value"}
                               />
                             </div>
                             <div className="col-span-2">

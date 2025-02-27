@@ -208,6 +208,7 @@ export const ModalPageTemplateTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
+                                required={true}
                                 name={"due_duration"}
                                 label={"Due Duration"}
                                 type={"money"}
@@ -219,9 +220,12 @@ export const ModalPageTemplateTask: FC<{
                             <div>
                               <Field
                                 fm={fm}
+                                required={true}
                                 name={"priority"}
                                 label={"Priority"}
-                                type={"dropdown"}
+                                type={"dropdown-async"}
+                                pagination={false}
+                                search="local"
                                 onLoad={async () => {
                                   return [
                                     {
@@ -238,15 +242,19 @@ export const ModalPageTemplateTask: FC<{
                                     },
                                   ];
                                 }}
+                                onLabel={"label"}
+                                onValue={"value"}
                               />
                             </div>
 
                             <div>
                               <Field
                                 fm={fm}
+                                required={true}
                                 name={"status"}
                                 label={"Status"}
-                                type={"dropdown"}
+                                pagination={false}
+                                search="local"
                                 onLoad={async () => {
                                   return [
                                     {
@@ -259,6 +267,8 @@ export const ModalPageTemplateTask: FC<{
                                     },
                                   ];
                                 }}
+                                onLabel={"label"}
+                                onValue={"value"}
                               />
                             </div>
                             <div className="col-span-2">
