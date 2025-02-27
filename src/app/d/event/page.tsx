@@ -133,11 +133,11 @@ function Page() {
         return result;
         // return [{}, {}, {}, {}];
       }}
-      onCount={async () => {
+      onCount={async (param) => {
         const result: any = await apix({
           port: "onboarding",
           value: "data.data.total",
-          path: `/api/events?page=1&page_size=1`,
+          path: `/api/events${param}`,
           validate: "object",
         });
         return getNumber(result);
