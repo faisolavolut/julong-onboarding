@@ -91,7 +91,7 @@ function Page() {
             return (
               <div className="flex items-center gap-x-0.5 whitespace-nowrap">
                 <ButtonBetterTooltip
-                  href={`/d/task/${id}`}
+                  href={`/d/task/${row.id}`}
                   tooltip={"View Task Employee"}
                   className="bg-primary"
                 >
