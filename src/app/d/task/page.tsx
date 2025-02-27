@@ -46,35 +46,35 @@ function Page() {
           },
         },
         {
-          name: "total_task",
+          name: "employee_kanban_progress.total_task",
           header: "Total Task",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
-          name: "todo",
+          name: "employee_kanban_progress.to_do",
           header: "To Do",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
-          name: "in_progress",
+          name: "employee_kanban_progress.in_progress",
           header: "In Progress",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
-          name: "need_review",
+          name: "employee_kanban_progress.need_review",
           header: "Need Review",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
           },
         },
         {
-          name: "completed",
+          name: "employee_kanban_progress.completed",
           header: "Completed",
           renderCell: ({ row, name }: any) => {
             return <>{formatMoney(getNumber(getValue(row, name)))}</>;
@@ -114,11 +114,11 @@ function Page() {
         });
         return result;
       }}
-      onCount={async () => {
+      onCount={async (params) => {
         const result: any = await apix({
           port: "portal",
           value: "data.data.total",
-          path: `/api/employees?page=1&page_size=1`,
+          path: `/api/employees${params}`,
           validate: "object",
         });
         return getNumber(result);
