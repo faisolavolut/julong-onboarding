@@ -105,7 +105,10 @@ function Page() {
         },
       ]}
       onLoad={async (param: any) => {
-        const params = await events("onload-param", param);
+        const params = await events("onload-param", {
+          ...param,
+          is_onboarding: "NO",
+        });
         const result: any = await apix({
           port: "portal",
           value: "data.data.employees",
@@ -118,7 +121,7 @@ function Page() {
         const result: any = await apix({
           port: "portal",
           value: "data.data.total",
-          path: `/api/employees${params}`,
+          path: `/api/employees${params}&is_onboarding=NO`,
           validate: "object",
         });
         return getNumber(result);
