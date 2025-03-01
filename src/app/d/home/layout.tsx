@@ -9,7 +9,7 @@ import { siteurl } from "@/lib/utils/siteurl";
 interface RootLayoutProps {
   children: React.ReactNode;
 }
-const permision = ["read-mpp-dir-unit"];
+const permision = ["read-home-onboarding"];
 
 const ValidateLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const [isClient, setIsClient] = useState(false);
