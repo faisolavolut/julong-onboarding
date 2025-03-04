@@ -24,6 +24,7 @@ import { ModalPageEditorBackground } from "./ModalPageEditorBackground";
 import { apix } from "@/lib/utils/apix";
 import { actionToast } from "@/lib/utils/action";
 import { convertForm } from "@/lib/utils/convetForm";
+import ImageBetter from "@/lib/components/ui/Image";
 
 export const ModalPageTemplateTask: FC<{
   open: boolean;
@@ -137,14 +138,22 @@ export const ModalPageTemplateTask: FC<{
                               className={cx(
                                 "relative flex flex-col items-end justify-center w-full h-64 rounded-lg  bg-gray-50",
                                 css`
-                                  background-image: url(${siteurl(
-                                    fm?.data?.cover
-                                  )});
                                   background-size: cover;
                                   background-position: center;
                                 `
                               )}
                             >
+                              <ImageBetter
+                                src={siteurl(fm?.data?.cover)}
+                                alt="John Cena"
+                                className={cx(
+                                  "absolute top-0 left-0 w-full h-full object-cover object-center",
+                                  css`
+                                    z-index: 0;
+                                  `
+                                )}
+                                defaultSrc={siteurl("/404-img.jpg")}
+                              />
                               <div className="w-full flex-grow flex-row">
                                 <ButtonBetter
                                   tooltip="Edit Backgound"

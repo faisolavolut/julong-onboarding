@@ -28,6 +28,7 @@ import { HiPlus } from "react-icons/hi";
 import { IoMdSave } from "react-icons/io";
 import { get_user } from "@/lib/utils/get_user";
 import { getNumber } from "@/lib/utils/getNumber";
+import ImageBetter from "@/lib/components/ui/Image";
 
 export const ModalPageTask: FC<{
   open: boolean;
@@ -102,14 +103,22 @@ export const ModalPageTask: FC<{
                               className={cx(
                                 "relative bg-gray-500 flex flex-col items-end justify-center w-full h-64 rounded-lg  bg-gray-50",
                                 css`
-                                  background-image: url(${siteurl(
-                                    fm?.data?.cover
-                                  )});
                                   background-size: cover;
                                   background-position: center;
                                 `
                               )}
                             >
+                              <ImageBetter
+                                src={siteurl(fm?.data?.cover)}
+                                alt="John Cena"
+                                className={cx(
+                                  "absolute top-0 left-0 w-full h-full object-cover object-center",
+                                  css`
+                                    z-index: 0;
+                                  `
+                                )}
+                                defaultSrc={siteurl("/404-img.jpg")}
+                              />
                               {fm.mode !== "view" ? (
                                 <>
                                   <div className="w-full flex-grow flex-row">

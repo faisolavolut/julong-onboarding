@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/lib/components/ui/dialog";
+import ImageBetter from "@/lib/components/ui/Image";
 import { ScrollArea } from "@/lib/components/ui/scroll-area";
 import { apix } from "@/lib/utils/apix";
 import getCroppedImg from "@/lib/utils/cropImage";
@@ -116,9 +117,6 @@ export const ModalPageEditorBackground: FC<{
                             className={cx(
                               "relative flex flex-col items-end mb-4 cursor-pointer justify-center w-full h-52 rounded-lg  bg-gray-50",
                               css`
-                                background-image: url(${siteurl(
-                                  `${item?.path}`
-                                )});
                                 background-size: cover;
                                 background-position: center;
                               `
@@ -132,7 +130,14 @@ export const ModalPageEditorBackground: FC<{
                               if (typeof onChange === "function")
                                 onChange(result);
                             }}
-                          ></div>
+                          >
+                            <ImageBetter
+                              src={siteurl(item?.path)}
+                              alt="John Cena"
+                              className=" w-full h-full object-cover object-center"
+                              defaultSrc={siteurl("/404-img.jpg")}
+                            />
+                          </div>
                         </>
                       );
                     }}
