@@ -136,9 +136,9 @@ function Page() {
 
           const result: any = await apix({
             port: "onboarding",
-            value: "data.data.total",
+            value: "data.data.covers",
             path: `/api/covers?page=1&page_size=1`,
-            validate: "object",
+            validate: "array",
           });
           return {
             priority: "HIGH",
