@@ -255,6 +255,39 @@ export const ModalPageTemplateTask: FC<{
                                 onValue={"value"}
                               />
                             </div>
+                            <div>
+                              <Field
+                                fm={fm}
+                                required={true}
+                                name={"organization_type"}
+                                label={"Organization Type"}
+                                type={"dropdown-async"}
+                                pagination={false}
+                                search="local"
+                                onLoad={async () => {
+                                  return [
+                                    {
+                                      label: "Estate & Mill",
+                                      value: "Estate & Mill",
+                                    },
+                                    {
+                                      label: "Estate",
+                                      value: "Estate",
+                                    },
+                                    {
+                                      label: "Mill",
+                                      value: "Mill",
+                                    },
+                                    {
+                                      label: "Office",
+                                      value: "Office",
+                                    },
+                                  ];
+                                }}
+                                onLabel={"label"}
+                                onValue={"value"}
+                              />
+                            </div>
 
                             <div>
                               <Field
