@@ -62,6 +62,7 @@ export const ModalPageTask: FC<{
           local.fm.data["cover_path"] = event?.path_origin;
           local.fm.data["cover"] = event?.path;
           local.fm.render();
+          console.log(local.fm);
         }}
       />
       <Dialog open={open}>

@@ -262,6 +262,7 @@ export const ModalPageTemplateTask: FC<{
                                 required={true}
                                 name={"status"}
                                 label={"Status"}
+                                type={"dropdown-async"}
                                 pagination={false}
                                 search="local"
                                 onLoad={async () => {
