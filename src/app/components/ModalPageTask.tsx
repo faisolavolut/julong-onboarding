@@ -589,15 +589,15 @@ export const ModalPageTask: FC<{
                                                 const check = data.filter(
                                                   (e: any) => e?.verified_by
                                                 );
-                                                const progress = Math.ceil(
-                                                  (check?.length /
-                                                    data?.length) *
-                                                    100
-                                                );
-                                                fm.data.progress =
-                                                  progress > 100
-                                                    ? 100
-                                                    : progress;
+                                                // const progress = Math.ceil(
+                                                //   (check?.length /
+                                                //     data?.length) *
+                                                //     100
+                                                // );
+                                                // fm.data.progress =
+                                                //   progress > 100
+                                                //     ? 100
+                                                //     : progress;
                                                 fm.render();
                                               }
                                             }}

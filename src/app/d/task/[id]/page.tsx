@@ -129,12 +129,12 @@ function Page() {
               });
               const data = res?.employee_task_checklists || [];
               const check = data.filter((e: any) => e?.verified_by);
-              const progress = Math.ceil((check?.length / data?.length) * 100);
+              // const progress = Math.ceil((check?.length / data?.length) * 100);
               return {
                 ...res,
                 cover: res?.cover_path,
                 cover_path: res?.cover_path_origin,
-                progress: progress > 100 ? 100 : progress,
+                // progress: progress > 100 ? 100 : progress,
               };
             }
             return {

@@ -12,7 +12,7 @@ export const TaskCard: React.FC<{
   render?: () => void;
   onClick?: (item: any) => void;
 }> = ({ data, hidden_save, render, onClick }) => {
-  const progress = getNumber(data?.progress_verified);
+  const progress = getNumber(data?.progress);
   const [favorite, setFavorite] = useState(data?.is_saved ? true : false);
   const [isZooming, setIsZooming] = useState(false);
   const handleClick = () => {
