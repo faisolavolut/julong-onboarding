@@ -14,6 +14,7 @@ import { events } from "@/lib/utils/event";
 import { actionToast } from "@/lib/utils/action";
 import { get_params_url } from "@/lib/utils/getParamsUrl";
 import { InputSearch } from "@/lib/components/ui/input-search";
+import { getAccess, userRoleMe } from "@/lib/utils/getAccess";
 function Page() {
   const [isClient, setIsClient] = useState(false);
   const [open, setOpen] = useState(false);
@@ -22,6 +23,7 @@ function Page() {
     open: false,
     ready: false,
     access: true,
+    can_add: false,
     search: null as any,
     selected: null as any,
     data: [] as any[],
@@ -82,6 +84,8 @@ function Page() {
   useEffect(() => {
     setIsClient(true);
     const run = async () => {
+      const roles = await userRoleMe();
+      local.can_add = getAccess("create-task-template", roles);
       const page = get_params_url("page");
       local.page = getNumber(page) ? getNumber(page) : 1;
       local.render();
@@ -153,16 +157,22 @@ function Page() {
       </div>
       <div className="w-full p-4 py-6 pr-6 pl-3 flex flex-row pt-2">
         <div className="flex flex-grow">
-          <ButtonBetter
-            onClick={() => {
-              local.selected = null;
-              local.render();
-              setOpen(true);
-            }}
-          >
-            <HiPlus className="text-xl" />
-            Add New
-          </ButtonBetter>
+          {local.can_add ? (
+            <>
+              <ButtonBetter
+                onClick={() => {
+                  local.selected = null;
+                  local.render();
+                  setOpen(true);
+                }}
+              >
+                <HiPlus className="text-xl" />
+                Add New
+              </ButtonBetter>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="flex flex-grow justify-end">
           <form

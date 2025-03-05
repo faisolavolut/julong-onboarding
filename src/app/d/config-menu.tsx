@@ -6,7 +6,7 @@ export const configMenu = [
     title: "Home",
     icon: <FaChartSimple />,
     href: "/d/home",
-    permision: ["read-dashboard-onboarding"],
+    permision: ["read-home-onboarding"],
   },
   {
     title: "Task Template",
