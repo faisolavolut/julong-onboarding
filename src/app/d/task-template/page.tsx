@@ -124,12 +124,12 @@ function Page() {
             });
             console.log({
               ...res,
-              cover: res?.CoverPath,
+              cover: res?.cover_path,
               cover_path: res?.cover_path_origin,
             });
             return {
               ...res,
-              cover: res?.CoverPath,
+              cover: res?.cover_path,
               cover_path: res?.cover_path_origin,
             };
           }

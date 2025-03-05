@@ -94,15 +94,15 @@ function Page() {
               });
               return {
                 ...res,
-                cover: res?.CoverPath,
+                cover: res?.cover_path,
                 cover_path: res?.cover_path_origin,
               };
             }
             const result: any = await apix({
               port: "onboarding",
-              value: "data.data.total",
+              value: "data.data.covers",
               path: `/api/covers?page=1&page_size=1`,
-              validate: "object",
+              validate: "array",
             });
             return {
               employee_id: id,
@@ -137,11 +137,18 @@ function Page() {
                 // progress: progress > 100 ? 100 : progress,
               };
             }
+            const result: any = await apix({
+              port: "onboarding",
+              value: "data.data.covers",
+              path: `/api/covers?page=1&page_size=1`,
+              validate: "array",
+            });
             return {
               employee_id: id,
               priority: "HIGH",
               status: "ACTIVE",
-              cover: "/template-1.png",
+              cover: result?.[0]?.path,
+              cover_path: result?.[0]?.path_origin,
             };
           }}
           onSubmit={async (fm) => {
