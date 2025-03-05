@@ -25,7 +25,7 @@ export const JobCard: React.FC<{
       <div className="flex justify-between items-center">
         <div className="w-full h-28">
           <ImageBetter
-            src={siteurl(data?.CoverPath)}
+            src={siteurl(data?.cover_path)}
             alt="John Cena"
             className=" w-full h-full object-cover object-right"
             defaultSrc={siteurl("/404-img.jpg")}
