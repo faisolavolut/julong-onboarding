@@ -459,7 +459,8 @@ export const ModalPageTask: FC<{
                             )}
                           </div>
                         </div>
-                        {fm?.mode === "view" ? (
+                        {fm?.mode === "view" &&
+                        fm?.data?.employee_task_checklists?.length ? (
                           <>
                             <div className="flex flex-row relative items-center gap-x-2">
                               <div className="flex flex-grow items-center flex-row ">

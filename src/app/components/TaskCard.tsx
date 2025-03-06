@@ -41,7 +41,7 @@ export const TaskCard: React.FC<{
       <div className="flex flex-col p-4">
         <div className="flex flex-row gap-x-1">
           <h2 className=" font-bold text-lg flex-grow">{data?.name}</h2>
-          <div className="flex items-center justify-end">
+          <div className="flex items-start justify-end">
             <div
               className={cx(
                 "	text-amber-600 p-1 text-xs rounded-md capitalize",
@@ -54,12 +54,22 @@ export const TaskCard: React.FC<{
             </div>
           </div>
         </div>
-        <div className="flex flex-col relative">
-          <div className="w-full justify-end text-[10px] text-primary flex flex-row font-bold">
-            {progress}%
-          </div>
-          <Progress value={progress} className={cx(`w-full h-2 bg-gray-300`)} />
-        </div>
+        {data?.employee_task_checklists?.length ? (
+          <>
+            <div className="flex flex-col relative">
+              <div className="w-full justify-end text-[10px] text-primary flex flex-row font-bold">
+                {progress}%
+              </div>
+              <Progress
+                value={progress}
+                className={cx(`w-full h-2 bg-gray-300`)}
+              />
+            </div>
+          </>
+        ) : (
+          <></>
+        )}
+
         <div className="flex flex-grow items-center justify-end py-1">
           <div className="flex flex-row items-center gap-x-1 text-[10px] text-primary">
             <LuCalendarDays />
