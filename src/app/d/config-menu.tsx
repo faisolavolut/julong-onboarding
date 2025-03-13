@@ -26,4 +26,10 @@ export const configMenu = [
     href: "/d/event",
     permision: ["read-events"],
   },
+  {
+    title: "Survey",
+    icon: <MdOutlineTaskAlt />,
+    href: "/d/survey",
+    permision: ["read-survey"],
+  },
 ];
