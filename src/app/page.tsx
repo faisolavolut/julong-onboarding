@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useLocal } from "@/lib/utils/use-local";
 import ServerErrorPage from "../lib/components/comp/500";
-import Link from "next/link";
 
 function HomePage() {
   const router = useRouter();
@@ -22,8 +21,8 @@ function HomePage() {
     if (!local.access) return <ServerErrorPage />;
   }
   return (
-    <div className="flex flex-col max-w-screen bg-white">
-      Direct to <Link href="/d/home">Dashboard</Link>
+    <div className="h-screen w-screen flex flex-row items-center justify-center">
+      <div className="spinner-better"></div>
     </div>
   );
 }
