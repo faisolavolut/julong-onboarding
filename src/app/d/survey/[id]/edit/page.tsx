@@ -1,21 +1,21 @@
 "use client";
-
 import { getParams } from "@/lib/utils/get-params";
 
 import { Field } from "@/lib/components/form/Field";
 import { FormBetter } from "@/lib/components/form/FormBetter";
 import { Alert } from "@/lib/components/ui/alert";
 import { BreadcrumbBetterLink } from "@/lib/components/ui/breadcrumb-link";
-import { ButtonContainer } from "@/lib/components/ui/button";
+import { ButtonBetter, ButtonContainer } from "@/lib/components/ui/button";
 import { apix } from "@/lib/utils/apix";
 import { useLocal } from "@/lib/utils/use-local";
 import { notFound } from "next/navigation";
 import { useEffect } from "react";
 import { IoMdSave } from "react-icons/io";
-import { MdDelete } from "react-icons/md";
+import { MdChecklist, MdDelete } from "react-icons/md";
 import { actionToast } from "@/lib/utils/action";
-import { normalDate } from "@/lib/utils/date";
-import { events } from "@/lib/utils/event";
+import { cloneFM } from "@/lib/utils/cloneFm";
+import { HiPlus } from "react-icons/hi";
+import { Rating } from "@/lib/components/ui/ratings";
 
 function Page() {
   const id = getParams("id");
@@ -105,32 +105,8 @@ function Page() {
       onSubmit={async (fm: any) => {
         const result = {
           ...fm.data,
-          start_date: normalDate(fm?.data?.start_date),
-          end_date: normalDate(fm?.data?.end_date),
-          event_employees: fm.data.employees?.length
-            ? fm.data.employees.map((e: any) => {
-                if (e?.check) {
-                  return {
-                    ...e,
-                    id: e?.id_event_employee,
-                    employee_id: e?.id,
-                  };
-                }
-                return {
-                  employee_id: e?.id,
-                };
-              })
-            : [],
         };
-        const res = await apix({
-          port: "onboarding",
-          value: "data.data",
-          path: "/api/events/update",
-          method: "put",
-          data: {
-            ...result,
-          },
-        });
+        console.log({ result });
       }}
       onLoad={async () => {
         const data: any = await apix({
@@ -139,8 +115,19 @@ function Page() {
           path: `/api/events/${id}`,
           validate: "object",
         });
+        const res: any = await apix({
+          port: "recruitment",
+          value: "data.data",
+          path: "/api/answer-types",
+          validate: "array",
+        });
+        res.push({
+          id: "123",
+          name: "Rating",
+        });
         return {
           ...data,
+          list_answer_type: res,
           employees: data?.event_employees?.length
             ? data.event_employees.map((e: any) => {
                 return {
@@ -167,87 +154,234 @@ function Page() {
                   <Field
                     fm={fm}
                     name={"name"}
-                    label={"Event Name"}
+                    label={"Title"}
                     type={"text"}
                     required={true}
                   />
                 </div>
-                <div>
-                  <Field
-                    fm={fm}
-                    target={"template_task_id"}
-                    name={"template_task"}
-                    label={"Template"}
-                    type={"dropdown-async"}
-                    onLoad={async (param: any) => {
-                      const params = await events("onload-param", {
-                        ...param,
-                        status: "ACTIVE",
-                      });
+              </div>
+              <div
+                className={cx(
+                  "w-full flex flex-row border-b border-gray-300 pb-1"
+                )}
+              >
+                <div className="flex flex-row items-center gap-x-2 font-bold text-md">
+                  <MdChecklist className="text-xl" />
+                  Add Question
+                </div>
+                <div className="flex flex-row flex-grow items-center justify-end gap-x-2">
+                  <ButtonBetter
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      const data = fm?.data?.template_task_checklists || [];
+                      const answerType = fm?.data?.list_answer_type || [];
+                      const findDefaultType = answerType.find(
+                        (e: any) => e?.name === "Text"
+                      );
+                      data.push(
+                        findDefaultType
+                          ? {
+                              answer_type_id: findDefaultType?.id,
+                              answer_types: findDefaultType,
+                              answer_type_name: "Text",
+                              rating: 5,
+                            }
+                          : {}
+                      );
+                      fm.data.template_task_checklists = data;
+                      fm.render();
+                      console.log(fm.data.template_task_checklists);
+                    }}
+                  >
+                    <HiPlus className="text-xl" />
+                    Add More
+                  </ButtonBetter>
+                </div>
+              </div>
+              <div className="flex flex-col gap-y-2 pt-2">
+                {fm?.data?.template_task_checklists?.length ? (
+                  <>
+                    <div className={cx("w-full flex flex-col gap-y-2 ")}>
+                      {fm?.data?.template_task_checklists.map(
+                        (e: any, idx: number) => {
+                          let fm_row = cloneFM(fm, e);
+                          const typeAnswer =
+                            typeof fm_row?.data?.answer_type_name === "string"
+                              ? fm_row?.data?.answer_type_name.toLowerCase()
+                              : null;
+                          return (
+                            <div
+                              className="max-w-full shadow-md p-2 rounded-md border border-gray-200"
+                              key={`question_${idx}`}
+                            >
+                              <div className="flex flex-row items-center gap-x-2 w-full">
+                                <div className="flex flex-col flex-grow">
+                                  <Field
+                                    style="underline"
+                                    fm={fm_row}
+                                    name={"name"}
+                                    label={"Recommend by"}
+                                    type={"text"}
+                                    hidden_label={true}
+                                    placeholder="Title Question"
+                                  />
+                                </div>
+                                <div className="flex flex-col w-[200px]">
+                                  <Field
+                                    fm={fm_row}
+                                    target={"answer_type_id"}
+                                    name="answer_types"
+                                    label={"Answer Type"}
+                                    type={"dropdown-async"}
+                                    hidden_label={true}
+                                    pagination={false}
+                                    search={"local"}
+                                    onChange={(item: any) => {
+                                      if (
+                                        ![
+                                          "multiple choice",
+                                          "checkbox",
+                                          "dropdown",
+                                          "single checkbox",
+                                        ].includes(typeAnswer) &&
+                                        ![
+                                          "multiple choice",
+                                          "checkbox",
+                                          "dropdown",
+                                          "single checkbox",
+                                        ].includes(item?.name?.toLowerCase())
+                                      ) {
+                                        fm_row.data.question_options = [];
+                                      } else if (
+                                        item?.name?.toLowerCase() === "rating"
+                                      ) {
+                                        fm_row.data.rating = 5;
+                                      }
+                                      fm_row.data.answer_type_name = item?.name;
+                                      fm_row.render();
+                                      fm.render();
+                                    }}
+                                    onLoad={async () => {
+                                      return fm.data?.list_answer_type || [];
+                                    }}
+                                    onLabel={"name"}
+                                    onValue={"id"}
+                                  />
+                                </div>
 
-                      const res: any = await apix({
-                        port: "onboarding",
-                        value: "data.data.data",
-                        path: `/api/template-tasks${params}`,
-                        validate: "array",
-                        keys: {
-                          label: "name",
-                        },
-                      });
-                    }}
-                    onLabel={"name"}
-                  />
-                </div>
-                <div>
-                  <Field
-                    fm={fm}
-                    name={"start_date"}
-                    label={"Start Date"}
-                    type={"date"}
-                    required={true}
-                  />
-                </div>
-                <div>
-                  <Field
-                    fm={fm}
-                    name={"end_date"}
-                    label={"Due Date"}
-                    type={"date"}
-                    required={true}
-                  />
-                </div>
-                <div>
-                  <Field
-                    fm={fm}
-                    name={"employees"}
-                    label={"Assignees"}
-                    type={"multi-async"}
-                    required={true}
-                    onLoad={async (param: any) => {
-                      const params = await events("onload-param", {
-                        ...param,
-                        is_onboarding: "NO",
-                      });
-                      const result: any = await apix({
-                        port: "portal",
-                        value: "data.data.employees",
-                        path: `/api/employees${params}`,
-                        validate: "array",
-                      });
-                      return result;
-                    }}
-                    onValue={(option) => option.id}
-                    onLabel={(option) => option.name}
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Field
-                    fm={fm}
-                    name={"description"}
-                    label={"Noted"}
-                    type={"textarea"}
-                  />
-                </div>
+                                <div className="">
+                                  <ButtonBetter
+                                    variant="destructive"
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      event.stopPropagation();
+                                      const data: any[] =
+                                        fm?.data?.template_question || [];
+                                      fm.data.template_question = data.filter(
+                                        (_, i) => i !== idx
+                                      );
+                                      const delete_id =
+                                        fm.data.deleted_question_ids || [];
+                                      if (e?.id) {
+                                        delete_id.push(e?.id);
+                                        fm.data.deleted_question_ids =
+                                          delete_id;
+                                      }
+                                      fm.render();
+                                    }}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={25}
+                                      height={25}
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <g fill="none">
+                                        <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
+                                        <path
+                                          fill="currentColor"
+                                          d="M20 5a1 1 0 1 1 0 2h-1l-.003.071l-.933 13.071A2 2 0 0 1 16.069 22H7.93a2 2 0 0 1-1.995-1.858l-.933-13.07L5 7H4a1 1 0 0 1 0-2zm-3.003 2H7.003l.928 13h8.138zM14 2a1 1 0 1 1 0 2h-4a1 1 0 0 1 0-2z"
+                                        ></path>
+                                      </g>
+                                    </svg>
+                                  </ButtonBetter>
+                                </div>
+                              </div>
+                              <div className="grid md:grid-cols-2 gap-1">
+                                {[
+                                  "multiple choice",
+                                  "checkbox",
+                                  "dropdown",
+                                  "single checkbox",
+                                ].includes(
+                                  typeof fm_row?.data?.answer_type_name ===
+                                    "string"
+                                    ? fm_row?.data?.answer_type_name.toLowerCase()
+                                    : null
+                                ) && (
+                                  <div>
+                                    <Field
+                                      fm={fm_row}
+                                      style="underline"
+                                      hidden_label={true}
+                                      name={"question_options"}
+                                      label={"Option"}
+                                      type={"tag"}
+                                      styleField={
+                                        [
+                                          "checkbox",
+                                          "single checkbox",
+                                        ].includes(typeAnswer)
+                                          ? "checkbox"
+                                          : ["dropdown"].includes(typeAnswer)
+                                          ? "order"
+                                          : ["multiple choice"].includes(
+                                              typeAnswer
+                                            )
+                                          ? "radio"
+                                          : null
+                                      }
+                                    />
+                                  </div>
+                                )}
+                                {["rating"].includes(typeAnswer) && (
+                                  <>
+                                    <div className="col-span-2 flex flex-row">
+                                      <div>
+                                        <Field
+                                          fm={fm_row}
+                                          style="underline"
+                                          hidden_label={true}
+                                          name={"rating"}
+                                          type={"money"}
+                                          placeholder="Your Rating (Star)"
+                                        />
+                                      </div>
+                                      <div className="flex flex-row items-center">
+                                        <Rating
+                                          rating={0}
+                                          totalStars={fm_row?.data?.rating}
+                                          size={24}
+                                          variant="yellow"
+                                          disabled={true}
+                                          className="flex flex-col"
+                                          showText={false}
+                                        />
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </>
