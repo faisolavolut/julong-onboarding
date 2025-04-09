@@ -84,7 +84,7 @@ function Page() {
         const result: any = await apix({
           port: "onboarding",
           value: "data.data.survey_templates",
-          path: `/api/employee-tasks/employee-paginated${params}`,
+          path: `/api/employee-tasks/survey${params}`,
           validate: "array",
         });
         return result;
@@ -93,7 +93,7 @@ function Page() {
         const result: any = await apix({
           port: "onboarding",
           value: "data.data.total",
-          path: `/api/employee-tasks/employee-paginated${param}`,
+          path: `/api/employee-tasks/survey${param}`,
           validate: "object",
         });
         return getNumber(result);
