@@ -12,11 +12,19 @@ import { SidebarProvider } from "@/lib/context/SidebarContext";
 import { Navbar } from "flowbite-react";
 import { siteurl } from "@/lib/utils/siteurl";
 import SidebarBetterTree from "@/lib/components/partials/SidebarBetter";
+import { SheetBetter } from "@/lib/components/ui/sheet";
+import { IoIosArrowBack } from "react-icons/io";
+import { Menu } from "@/lib/svg/Menu";
+import { Bell, Home } from "lucide-react";
+import { NotificationSheet } from "@/lib/components/ui/notification";
+import { ButtonLink } from "@/lib/components/ui/button-link";
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const [isOpen, setOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState("");
   const [mini, setMini] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
@@ -32,6 +40,10 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
       localStorage.setItem("mini", mini ? "true" : "false");
     } else {
       setMini(localMini === "true" ? true : false);
+    }
+    if (typeof location === "object") {
+      const newPage = window.location.pathname;
+      setCurrentPage(newPage);
     }
     const run = async () => {
       try {
@@ -60,9 +72,9 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex h-screen flex-row">
-      <div className="flex flex-col p-3 bg-layer ">
-        <div className="flex flex-col flex-grow rounded-2xl shadow-md">
+    <div className="flex h-screen flex-col md:flex-row">
+      <div className=" flex-col p-3 bg-layer hidden md:flex">
+        <div className=" flex-col flex-grow rounded-2xl shadow-md flex">
           <Navbar fluid className="pb-0 bg-white relative rounded-t-2xl">
             <div className="w-full p-1 pb-0">
               <div
@@ -141,26 +153,105 @@ const AdminLayout: React.FC<RootLayoutProps> = ({ children }) => {
           )}
         </div>
       </div>
-      <div className="flex  bg-layer flex-grow flex-col">
-        <div
-          className={cx(
-            "flex flex-col flex-grow  flex-grow  bg-cover bg-no-repeat	 bg-right-bottom"
-          )}
-        >
-          <div className="flex flex-row flex-grow  flex-grow">
-            <div
-              id="main-content"
-              className="flex-grow  relative overflow-y-auto flex flex-row"
-            >
-              <div className="w-full h-full absolute top-0 lef-0 flex flex-row ">
-                {isClient ? (
-                  <main className="flex-grow flex flex-col">{children}</main>
-                ) : (
-                  <>Loading</>
-                )}
-              </div>
+      <div className="flex  bg-layer flex-grow flex-col ">
+        <div className="flex flex-col md:flex-row  flex-grow">
+          <div
+            id="main-content"
+            className="flex-grow  relative overflow-y-auto flex flex-row"
+          >
+            <div className="w-full h-full absolute top-0 lef-0 flex flex-row  p-4 pb-0 pt-0 pr-0  pl-1 md:pl-3">
+              {isClient ? (
+                <main className="flex-grow flex flex-col">{children}</main>
+              ) : (
+                <>Loading</>
+              )}
             </div>
           </div>
+        </div>
+      </div>
+      {/* MENU MOBILE */}
+      <div
+        className={cx(
+          "flex md:hidden flex-row  sticky bottom-0 left-0",
+          css`
+            z-index: 1;
+          `
+        )}
+      >
+        <div
+          className={cx(
+            "w-full bg-white shadow-md border border-primary text-white flex justify-around py-3 rounded-t-2xl flex-row items-center",
+            css`
+              z-index: 1;
+            `
+          )}
+        >
+          <div className="flex flex-row items-center">
+            <ButtonLink
+              variant="clean"
+              href="/d/home"
+              onClick={() => {
+                setCurrentPage("/d/home");
+              }}
+            >
+              <div
+                className={cx(
+                  currentPage === "/d/home" ? "text-primary" : "text-gray-500"
+                )}
+              >
+                <Home className="w-6 h-6" />
+              </div>
+            </ButtonLink>
+          </div>
+
+          <div className={cx("text-gray-500 flex flex-row items-center")}>
+            <NotificationSheet
+              className="text-gray-500"
+              children={<Bell size={24} />}
+            />
+          </div>
+          <SheetBetter
+            open={isOpen}
+            contentOpen={
+              <div>
+                <Menu className="w-6 h-6 text-gray-500" />
+              </div>
+            }
+            side="left"
+            onOpenChange={(event) => {
+              setOpen(event);
+            }}
+            showClose={false}
+            className="p-0"
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex flex-row py-4 items-center  px-6 ">
+                <div
+                  onClick={() => {
+                    setOpen(false);
+                  }}
+                  className="flex flex-row items-center gap-x-2 text-gray-500 cursor-pointer"
+                >
+                  <IoIosArrowBack className="h-6 w-6" />
+                  Back
+                </div>
+              </div>
+              <div className="flex flex-col gap-y-2 flex-grow">
+                <SidebarProvider>
+                  <SidebarBetterTree
+                    data={local.data}
+                    minimaze={() => {
+                      setMini(!mini);
+                    }}
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                    mini={false}
+                  />
+                </SidebarProvider>
+              </div>
+            </div>
+          </SheetBetter>
         </div>
       </div>
     </div>

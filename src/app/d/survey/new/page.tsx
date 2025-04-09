@@ -5,7 +5,6 @@ import { Alert } from "@/lib/components/ui/alert";
 import { BreadcrumbBetterLink } from "@/lib/components/ui/breadcrumb-link";
 import { ButtonContainer } from "@/lib/components/ui/button";
 import { apix } from "@/lib/utils/apix";
-import { normalDate } from "@/lib/utils/date";
 import { useLocal } from "@/lib/utils/use-local";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -72,20 +71,11 @@ function Page() {
       onSubmit={async (fm: any) => {
         const result = {
           ...fm.data,
-          start_date: normalDate(fm?.data?.start_date),
-          end_date: normalDate(fm?.data?.end_date),
-          event_employees: fm.data.employees?.length
-            ? fm.data.employees.map((e: any) => {
-                return {
-                  employee_id: e?.id,
-                };
-              })
-            : [],
         };
         const res = await apix({
           port: "onboarding",
           value: "data.data",
-          path: "/api/events",
+          path: "/api/survey-templates",
           method: "post",
           data: {
             ...result,
@@ -108,7 +98,7 @@ function Page() {
                 <div>
                   <Field
                     fm={fm}
-                    name={"name"}
+                    name={"title"}
                     label={"Name"}
                     type={"text"}
                     required={true}

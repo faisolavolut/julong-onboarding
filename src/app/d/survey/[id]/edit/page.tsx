@@ -79,8 +79,8 @@ function Page() {
                   await actionToast({
                     task: async () => {
                       await apix({
-                        port: "recruitment",
-                        path: `/api/events/${id}`,
+                        port: "onboarding",
+                        path: `/api/survey-templates/${id}`,
                         method: "delete",
                       });
                     },
@@ -103,30 +103,64 @@ function Page() {
         );
       }}
       onSubmit={async (fm: any) => {
+        let questions = fm.data?.questions || [];
+        if (questions?.length) {
+          questions = questions.map((e: any) => {
+            delete e["attachment"];
+            return {
+              ...e,
+              question_options: e?.question_options?.length
+                ? e.question_options.map((e: any) => {
+                    return {
+                      option_text: e,
+                    };
+                  })
+                : [],
+            };
+          });
+        }
         const result = {
           ...fm.data,
+          questions,
         };
-        console.log({ result });
+        const res = await apix({
+          port: "onboarding",
+          value: "data.data",
+          path: "/api/survey-templates/update",
+          method: "put",
+          data: {
+            ...result,
+          },
+        });
       }}
       onLoad={async () => {
         const data: any = await apix({
           port: "onboarding",
           value: "data.data",
-          path: `/api/events/${id}`,
+          path: `/api/survey-templates/${id}`,
           validate: "object",
         });
         const res: any = await apix({
-          port: "recruitment",
+          port: "onboarding",
           value: "data.data",
           path: "/api/answer-types",
           validate: "array",
         });
-        res.push({
-          id: "123",
-          name: "Rating",
-        });
+        const questions = data?.questions?.length
+          ? data.questions.map((e: any) => {
+              return {
+                ...e,
+                answer_type_name: e?.answer_type?.name,
+                question_options: e?.question_options?.length
+                  ? e.question_options.map((e: any) => e.option_text)
+                  : [],
+              };
+            })
+          : [];
         return {
           ...data,
+          survey_template_id: data?.id,
+          questions,
           list_answer_type: res,
           employees: data?.event_employees?.length
             ? data.event_employees.map((e: any) => {
@@ -153,7 +187,7 @@ function Page() {
                 <div>
                   <Field
                     fm={fm}
-                    name={"name"}
+                    name={"title"}
                     label={"Title"}
                     type={"text"}
                     required={true}
@@ -174,24 +208,25 @@ function Page() {
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
-                      const data = fm?.data?.template_task_checklists || [];
+                      const data = fm?.data?.questions || [];
                       const answerType = fm?.data?.list_answer_type || [];
                       const findDefaultType = answerType.find(
-                        (e: any) => e?.name === "Text"
+                        (e: any) => e?.name === "Short Answer"
                       );
                       data.push(
                         findDefaultType
                           ? {
                               answer_type_id: findDefaultType?.id,
                               answer_types: findDefaultType,
-                              answer_type_name: "Text",
-                              rating: 5,
+                              answer_type_name: "Short Answer",
+                              answer_type: findDefaultType,
+                              max_stars: 5,
                             }
                           : {}
                       );
-                      fm.data.template_task_checklists = data;
+                      fm.data.questions = data;
                       fm.render();
-                      console.log(fm.data.template_task_checklists);
+                      console.log(fm.data.questions);
                     }}
                   >
                     <HiPlus className="text-xl" />
@@ -200,183 +235,186 @@ function Page() {
                 </div>
               </div>
               <div className="flex flex-col gap-y-2 pt-2">
-                {fm?.data?.template_task_checklists?.length ? (
+                {fm?.data?.questions?.length ? (
                   <>
                     <div className={cx("w-full flex flex-col gap-y-2 ")}>
-                      {fm?.data?.template_task_checklists.map(
-                        (e: any, idx: number) => {
-                          let fm_row = cloneFM(fm, e);
-                          const typeAnswer =
-                            typeof fm_row?.data?.answer_type_name === "string"
-                              ? fm_row?.data?.answer_type_name.toLowerCase()
-                              : null;
-                          return (
-                            <div
-                              className="max-w-full shadow-md p-2 rounded-md border border-gray-200"
-                              key={`question_${idx}`}
-                            >
-                              <div className="flex flex-row items-center gap-x-2 w-full">
-                                <div className="flex flex-col flex-grow">
-                                  <Field
-                                    style="underline"
-                                    fm={fm_row}
-                                    name={"name"}
-                                    label={"Recommend by"}
-                                    type={"text"}
-                                    hidden_label={true}
-                                    placeholder="Title Question"
-                                  />
-                                </div>
-                                <div className="flex flex-col w-[200px]">
-                                  <Field
-                                    fm={fm_row}
-                                    target={"answer_type_id"}
-                                    name="answer_types"
-                                    label={"Answer Type"}
-                                    type={"dropdown-async"}
-                                    hidden_label={true}
-                                    pagination={false}
-                                    search={"local"}
-                                    onChange={(item: any) => {
-                                      if (
-                                        ![
-                                          "multiple choice",
-                                          "checkbox",
-                                          "dropdown",
-                                          "single checkbox",
-                                        ].includes(typeAnswer) &&
-                                        ![
-                                          "multiple choice",
-                                          "checkbox",
-                                          "dropdown",
-                                          "single checkbox",
-                                        ].includes(item?.name?.toLowerCase())
-                                      ) {
-                                        fm_row.data.question_options = [];
-                                      } else if (
-                                        item?.name?.toLowerCase() === "rating"
-                                      ) {
-                                        fm_row.data.rating = 5;
-                                      }
-                                      fm_row.data.answer_type_name = item?.name;
-                                      fm_row.render();
-                                      fm.render();
-                                    }}
-                                    onLoad={async () => {
-                                      return fm.data?.list_answer_type || [];
-                                    }}
-                                    onLabel={"name"}
-                                    onValue={"id"}
-                                  />
-                                </div>
-
-                                <div className="">
-                                  <ButtonBetter
-                                    variant="destructive"
-                                    onClick={(event) => {
-                                      event.preventDefault();
-                                      event.stopPropagation();
-                                      const data: any[] =
-                                        fm?.data?.template_question || [];
-                                      fm.data.template_question = data.filter(
-                                        (_, i) => i !== idx
-                                      );
-                                      const delete_id =
-                                        fm.data.deleted_question_ids || [];
-                                      if (e?.id) {
-                                        delete_id.push(e?.id);
-                                        fm.data.deleted_question_ids =
-                                          delete_id;
-                                      }
-                                      fm.render();
-                                    }}
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width={25}
-                                      height={25}
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <g fill="none">
-                                        <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
-                                        <path
-                                          fill="currentColor"
-                                          d="M20 5a1 1 0 1 1 0 2h-1l-.003.071l-.933 13.071A2 2 0 0 1 16.069 22H7.93a2 2 0 0 1-1.995-1.858l-.933-13.07L5 7H4a1 1 0 0 1 0-2zm-3.003 2H7.003l.928 13h8.138zM14 2a1 1 0 1 1 0 2h-4a1 1 0 0 1 0-2z"
-                                        ></path>
-                                      </g>
-                                    </svg>
-                                  </ButtonBetter>
-                                </div>
+                      {fm?.data?.questions.map((e: any, idx: number) => {
+                        let fm_row = cloneFM(fm, e);
+                        const typeAnswer =
+                          typeof fm_row?.data?.answer_type_name === "string"
+                            ? fm_row?.data?.answer_type_name.toLowerCase()
+                            : null;
+                        return (
+                          <div
+                            className="max-w-full shadow-md p-2 rounded-md border border-gray-200"
+                            key={`question_${idx}`}
+                          >
+                            <div className="flex flex-row items-center gap-x-2 w-full">
+                              <div className="flex flex-col flex-grow">
+                                <Field
+                                  style="underline"
+                                  fm={fm_row}
+                                  name={"question"}
+                                  label={"Recommend by"}
+                                  type={"text"}
+                                  hidden_label={true}
+                                  placeholder="Title Question"
+                                />
                               </div>
-                              <div className="grid md:grid-cols-2 gap-1">
-                                {[
-                                  "multiple choice",
-                                  "checkbox",
-                                  "dropdown",
-                                  "single checkbox",
-                                ].includes(
-                                  typeof fm_row?.data?.answer_type_name ===
-                                    "string"
-                                    ? fm_row?.data?.answer_type_name.toLowerCase()
-                                    : null
-                                ) && (
-                                  <div>
-                                    <Field
-                                      fm={fm_row}
-                                      style="underline"
-                                      hidden_label={true}
-                                      name={"question_options"}
-                                      label={"Option"}
-                                      type={"tag"}
-                                      styleField={
-                                        [
-                                          "checkbox",
-                                          "single checkbox",
-                                        ].includes(typeAnswer)
-                                          ? "checkbox"
-                                          : ["dropdown"].includes(typeAnswer)
-                                          ? "order"
-                                          : ["multiple choice"].includes(
-                                              typeAnswer
-                                            )
-                                          ? "radio"
-                                          : null
-                                      }
-                                    />
-                                  </div>
-                                )}
-                                {["rating"].includes(typeAnswer) && (
-                                  <>
-                                    <div className="col-span-2 flex flex-row">
-                                      <div>
-                                        <Field
-                                          fm={fm_row}
-                                          style="underline"
-                                          hidden_label={true}
-                                          name={"rating"}
-                                          type={"money"}
-                                          placeholder="Your Rating (Star)"
-                                        />
-                                      </div>
-                                      <div className="flex flex-row items-center">
-                                        <Rating
-                                          rating={0}
-                                          totalStars={fm_row?.data?.rating}
-                                          size={24}
-                                          variant="yellow"
-                                          disabled={true}
-                                          className="flex flex-col"
-                                          showText={false}
-                                        />
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
+                              <div className="flex flex-col w-[200px]">
+                                <Field
+                                  fm={fm_row}
+                                  target={"answer_type_id"}
+                                  name="answer_type"
+                                  label={"Answer Type"}
+                                  type={"dropdown-async"}
+                                  hidden_label={true}
+                                  pagination={false}
+                                  search={"local"}
+                                  onChange={(item: any) => {
+                                    if (
+                                      ![
+                                        "multiple choice",
+                                        "checkbox",
+                                        "dropdown",
+                                        "single checkbox",
+                                      ].includes(typeAnswer) &&
+                                      ![
+                                        "multiple choice",
+                                        "checkbox",
+                                        "dropdown",
+                                        "single checkbox",
+                                      ].includes(item?.name?.toLowerCase())
+                                    ) {
+                                      fm_row.data.question_options = [];
+                                    } else if (
+                                      item?.name?.toLowerCase() === "rating"
+                                    ) {
+                                      fm_row.data.rating = 5;
+                                    }
+                                    fm_row.data.answer_type_name = item?.name;
+                                    fm_row.render();
+                                    fm.render();
+                                  }}
+                                  onLoad={async () => {
+                                    return fm.data?.list_answer_type || [];
+                                  }}
+                                  onLabel={"name"}
+                                  onValue={"id"}
+                                />
+                              </div>
+
+                              <div className="">
+                                <ButtonBetter
+                                  variant="destructive"
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    const data: any[] =
+                                      fm?.data?.questions || [];
+                                    fm.data.questions = data.filter(
+                                      (_, i) => i !== idx
+                                    );
+                                    const delete_id =
+                                      fm.data.deleted_question_ids || [];
+                                    if (e?.id) {
+                                      delete_id.push(e?.id);
+                                      fm.data.deleted_question_ids = delete_id;
+                                    }
+                                    fm.render();
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width={25}
+                                    height={25}
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <g fill="none">
+                                      <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"></path>
+                                      <path
+                                        fill="currentColor"
+                                        d="M20 5a1 1 0 1 1 0 2h-1l-.003.071l-.933 13.071A2 2 0 0 1 16.069 22H7.93a2 2 0 0 1-1.995-1.858l-.933-13.07L5 7H4a1 1 0 0 1 0-2zm-3.003 2H7.003l.928 13h8.138zM14 2a1 1 0 1 1 0 2h-4a1 1 0 0 1 0-2z"
+                                      ></path>
+                                    </g>
+                                  </svg>
+                                </ButtonBetter>
                               </div>
                             </div>
-                          );
-                        }
-                      )}
+                            <div className="grid md:grid-cols-2 gap-1">
+                              {[
+                                "multiple choice",
+                                "checkbox",
+                                "dropdown",
+                                "single checkbox",
+                              ].includes(
+                                typeof fm_row?.data?.answer_type_name ===
+                                  "string"
+                                  ? fm_row?.data?.answer_type_name.toLowerCase()
+                                  : null
+                              ) && (
+                                <div>
+                                  <Field
+                                    fm={fm_row}
+                                    style="underline"
+                                    hidden_label={true}
+                                    name={"question_options"}
+                                    label={"Option"}
+                                    type={"tag"}
+                                    mode={"object"}
+                                    styleField={
+                                      ["checkbox", "single checkbox"].includes(
+                                        typeAnswer
+                                      )
+                                        ? "checkbox"
+                                        : ["dropdown"].includes(typeAnswer)
+                                        ? "order"
+                                        : ["multiple choice"].includes(
+                                            typeAnswer
+                                          )
+                                        ? "radio"
+                                        : null
+                                    }
+                                  />
+                                </div>
+                              )}
+                              {["rating"].includes(typeAnswer) && (
+                                <>
+                                  <div className="col-span-2 flex flex-wrap">
+                                    <div>
+                                      <Field
+                                        fm={fm_row}
+                                        style="underline"
+                                        hidden_label={true}
+                                        name={"max_stars"}
+                                        type={"money"}
+                                        onChange={() => {
+                                          if (fm_row?.data?.max_stars > 20) {
+                                            fm_row.data.max_stars = 20;
+                                          }
+                                          fm.render();
+                                        }}
+                                        placeholder="Your Rating (Star)"
+                                      />
+                                    </div>
+                                    <div className="flex flex-row items-center">
+                                      <Rating
+                                        rating={0}
+                                        totalStars={fm_row?.data?.max_stars}
+                                        size={24}
+                                        variant="yellow"
+                                        disabled={true}
+                                        className="flex flex-col"
+                                        showText={false}
+                                      />
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 ) : (

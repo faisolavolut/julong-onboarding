@@ -59,7 +59,7 @@ function Page() {
         await apix({
           port: "recruitment",
           value: "data.data",
-          path: "/api/survey-templates",
+          path: "/api/document-verifications",
           method: "put",
           data: {
             ...fm.data,
@@ -68,13 +68,16 @@ function Page() {
       }}
       mode="view"
       onLoad={async () => {
-        const data: any = await apix({
-          port: "recruitment",
-          value: "data.data",
-          path: `/api/document-verifications/${id}`,
-          validate: "object",
-        });
-        return { ...data, template_name: data?.template_question?.name };
+        return {
+          question: [{}],
+        };
+        // const data: any = await apix({
+        //   port: "recruitment",
+        //   value: "data.data",
+        //   path: `/api/document-verifications/${id}`,
+        //   validate: "object",
+        // });
+        // return { ...data, template_name: data?.template_question?.name };
       }}
       showResize={false}
       header={(fm: any) => {

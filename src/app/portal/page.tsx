@@ -50,10 +50,10 @@ function Portal() {
           local.ready = true;
           local.render();
         } else {
-          navigate(`${process.env.NEXT_PUBLIC_API_PORTAL}/login`);
+          // navigate(`${process.env.NEXT_PUBLIC_API_PORTAL}/login`);
         }
       } catch (e) {
-        navigate(`${process.env.NEXT_PUBLIC_API_PORTAL}/login`);
+        // navigate(`${process.env.NEXT_PUBLIC_API_PORTAL}/login`);
       }
     };
     run();

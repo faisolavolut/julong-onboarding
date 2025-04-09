@@ -48,7 +48,7 @@ function Page() {
       }}
       column={[
         {
-          name: "title",
+          name: "name",
           header: "Name",
           renderCell: ({ row, name }: any) => {
             return <>{getValue(row, name)}</>;
@@ -98,12 +98,11 @@ function Page() {
         const params = await events("onload-param", param);
         const result: any = await apix({
           port: "onboarding",
-          value: "data.data.survey_templates",
-          path: `/api/survey-templates${params}`,
+          value: "data.data.events",
+          path: `/api/events${params}`,
           validate: "array",
         });
         return result;
-        // return [{}, {}, {}, {}];
       }}
       onCount={async (param) => {
         const result: any = await apix({

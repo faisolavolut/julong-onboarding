@@ -230,215 +230,221 @@ function Page() {
           <div className="spinner-better"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-4 flex-grow pb-3">
-          <ListUI
-            name="todo"
-            title={({ ui, count }: any) => {
-              return (
-                <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#9EADD8] text-white font-medium shadow-md">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
-                      <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+        <div className="relative flex flex-col flex-grow overflow-x-scroll">
+          <div className="absolute md:relative h-full w-full top-0 left-0  flex flex-row md:grid md:grid-cols-4 gap-4 flex-grow pb-3">
+            <ListUI
+              className="w-[300px] md:w-full"
+              name="todo"
+              title={({ ui, count }: any) => {
+                return (
+                  <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#9EADD8] text-white font-medium shadow-md">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                      </div>
+                      <span className="text-md font-semibold tracking-wide">
+                        To Do
+                      </span>
                     </div>
-                    <span className="text-md font-semibold tracking-wide">
-                      To Do
-                    </span>
-                  </div>
-                  <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
-                    {getNumber(ui?.table?.count) > 99
-                      ? `99+`
-                      : formatMoney(getNumber(ui?.table?.count))}
-                  </div>
-                </div>
-              );
-            }}
-            content={({ item }: any) => {
-              return (
-                <>
-                  <TaskCard
-                    data={item}
-                    onClick={(item) => {
-                      local.selected = item;
-                      local.render();
-                      setOpenTask(true);
-                    }}
-                  />
-                </>
-              );
-            }}
-            onLoad={async (param: any) => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "TO_DO",
-                param: param,
-              });
-              return result;
-            }}
-            onCount={async () => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "TO_DO",
-                mode: "count",
-              });
-              return result;
-            }}
-          />
-          <ListUI
-            name="in_progress"
-            title={({ ui, count }: any) => {
-              return (
-                <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#7C94CD] text-white font-medium shadow-md">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
-                      <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                    <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
+                      {getNumber(ui?.table?.count) > 99
+                        ? `99+`
+                        : formatMoney(getNumber(ui?.table?.count))}
                     </div>
-                    <span className="text-md font-semibold tracking-wide">
-                      In Progress
-                    </span>
                   </div>
-                  <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
-                    {getNumber(ui?.table?.count) > 99
-                      ? `99+`
-                      : formatMoney(getNumber(ui?.table?.count))}
-                  </div>
-                </div>
-              );
-            }}
-            content={({ item }: any) => {
-              return (
-                <>
-                  <TaskCard
-                    data={item}
-                    onClick={(item) => {
-                      local.selected = item;
-                      local.render();
-                      setOpenTask(true);
-                    }}
-                  />
-                </>
-              );
-            }}
-            onLoad={async (param: any) => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "IN_PROGRESS",
-                param: param,
-              });
-              return result;
-            }}
-            onCount={async () => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "IN_PROGRESS",
-                mode: "count",
-              });
-              return result;
-            }}
-          />
-          <ListUI
-            name="need_review"
-            title={({ ui, count }: any) => {
-              return (
-                <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#4C5EA2] text-white font-medium shadow-md">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
-                      <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                );
+              }}
+              content={({ item }: any) => {
+                return (
+                  <>
+                    <TaskCard
+                      data={item}
+                      onClick={(item) => {
+                        local.selected = item;
+                        local.render();
+                        setOpenTask(true);
+                      }}
+                    />
+                  </>
+                );
+              }}
+              onLoad={async (param: any) => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "TO_DO",
+                  param: param,
+                });
+                return result;
+              }}
+              onCount={async () => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "TO_DO",
+                  mode: "count",
+                });
+                return result;
+              }}
+            />
+            <ListUI
+              name="in_progress"
+              className="w-[300px] md:w-full"
+              title={({ ui, count }: any) => {
+                return (
+                  <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#7C94CD] text-white font-medium shadow-md">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                      </div>
+                      <span className="text-md font-semibold tracking-wide">
+                        In Progress
+                      </span>
                     </div>
-                    <span className="text-md font-semibold tracking-wide">
-                      Need Review
-                    </span>
-                  </div>
-                  <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
-                    {getNumber(ui?.table?.count) > 99
-                      ? `99+`
-                      : formatMoney(getNumber(ui?.table?.count))}
-                  </div>
-                </div>
-              );
-            }}
-            content={({ item }: any) => {
-              return (
-                <>
-                  <TaskCard
-                    data={item}
-                    onClick={(item) => {
-                      local.selected = item;
-                      local.render();
-                      setOpenTask(true);
-                    }}
-                  />
-                </>
-              );
-            }}
-            onLoad={async (param: any) => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "NEED_REVIEW",
-                param: param,
-              });
-              return result;
-            }}
-            onCount={async () => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "NEED_REVIEW",
-                mode: "count",
-              });
-              return result;
-            }}
-          />
-          <ListUI
-            name="completed"
-            title={({ ui, count }: any) => {
-              return (
-                <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-primary text-white font-medium shadow-md">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
-                      <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                    <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
+                      {getNumber(ui?.table?.count) > 99
+                        ? `99+`
+                        : formatMoney(getNumber(ui?.table?.count))}
                     </div>
-                    <span className="text-md font-semibold tracking-wide">
-                      Completed
-                    </span>
                   </div>
-                  <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
-                    {getNumber(ui?.table?.count) > 99
-                      ? `99+`
-                      : formatMoney(getNumber(ui?.table?.count))}
+                );
+              }}
+              content={({ item }: any) => {
+                return (
+                  <>
+                    <TaskCard
+                      data={item}
+                      onClick={(item) => {
+                        local.selected = item;
+                        local.render();
+                        setOpenTask(true);
+                      }}
+                    />
+                  </>
+                );
+              }}
+              onLoad={async (param: any) => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "IN_PROGRESS",
+                  param: param,
+                });
+                return result;
+              }}
+              onCount={async () => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "IN_PROGRESS",
+                  mode: "count",
+                });
+                return result;
+              }}
+            />
+            <ListUI
+              name="need_review"
+              className="w-[300px] md:w-full"
+              title={({ ui, count }: any) => {
+                return (
+                  <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-[#4C5EA2] text-white font-medium shadow-md">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                      </div>
+                      <span className="text-md font-semibold tracking-wide">
+                        Need Review
+                      </span>
+                    </div>
+                    <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
+                      {getNumber(ui?.table?.count) > 99
+                        ? `99+`
+                        : formatMoney(getNumber(ui?.table?.count))}
+                    </div>
                   </div>
-                </div>
-              );
-            }}
-            content={({ item }: any) => {
-              return (
-                <>
-                  <TaskCard
-                    data={item}
-                    onClick={(item) => {
-                      local.selected = item;
-                      local.render();
-                      setOpenTask(true);
-                    }}
-                  />
-                </>
-              );
-            }}
-            onLoad={async (param: any) => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "COMPLETED",
-                param: param,
-              });
-              return result;
-            }}
-            onCount={async () => {
-              const result: any = await getDataKanban({
-                employee_id: id,
-                status: "COMPLETED",
-                mode: "count",
-              });
-              return result;
-            }}
-          />
+                );
+              }}
+              content={({ item }: any) => {
+                return (
+                  <>
+                    <TaskCard
+                      data={item}
+                      onClick={(item) => {
+                        local.selected = item;
+                        local.render();
+                        setOpenTask(true);
+                      }}
+                    />
+                  </>
+                );
+              }}
+              onLoad={async (param: any) => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "NEED_REVIEW",
+                  param: param,
+                });
+                return result;
+              }}
+              onCount={async () => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "NEED_REVIEW",
+                  mode: "count",
+                });
+                return result;
+              }}
+            />
+            <ListUI
+              name="completed"
+              className="w-[300px] md:w-full"
+              title={({ ui, count }: any) => {
+                return (
+                  <div className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-primary text-white font-medium shadow-md">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full opacity-50"></div>
+                      </div>
+                      <span className="text-md font-semibold tracking-wide">
+                        Completed
+                      </span>
+                    </div>
+                    <div className="w-6 h-6 bg-white text-blue-500 font-bold text-sm rounded-full flex items-center justify-center">
+                      {getNumber(ui?.table?.count) > 99
+                        ? `99+`
+                        : formatMoney(getNumber(ui?.table?.count))}
+                    </div>
+                  </div>
+                );
+              }}
+              content={({ item }: any) => {
+                return (
+                  <>
+                    <TaskCard
+                      data={item}
+                      onClick={(item) => {
+                        local.selected = item;
+                        local.render();
+                        setOpenTask(true);
+                      }}
+                    />
+                  </>
+                );
+              }}
+              onLoad={async (param: any) => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "COMPLETED",
+                  param: param,
+                });
+                return result;
+              }}
+              onCount={async () => {
+                const result: any = await getDataKanban({
+                  employee_id: id,
+                  status: "COMPLETED",
+                  mode: "count",
+                });
+                return result;
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
