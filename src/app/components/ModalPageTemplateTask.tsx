@@ -111,6 +111,7 @@ export const ModalPageTemplateTask: FC<{
                       : [],
                     checklist: form,
                   };
+                  delete result["survey_template"];
                   delete result["template_task_attachments"];
                   delete result["template_task_checklists"];
                   if (data?.id) {

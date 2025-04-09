@@ -192,6 +192,7 @@ function Page() {
             delete result["employee_task_attachments"];
             delete result["employee_task_checklists"];
             delete result["proof"];
+            delete result["survey_template"];
             console.log({ result });
             const res = await apix({
               port: "onboarding",

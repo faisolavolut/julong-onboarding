@@ -112,6 +112,7 @@ export const ModalPageEditorTask: FC<{
                       : [],
                     checklist: form,
                   };
+                  delete result["survey_template"];
                   delete result["employee_task_attachments"];
                   delete result["employee_task_checklists"];
                   if (data?.id) {
