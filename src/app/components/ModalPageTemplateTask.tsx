@@ -69,8 +69,8 @@ export const ModalPageTemplateTask: FC<{
         }}
         onChange={(event) => {
           setOpenSurvey(false);
-          local.fm.data["survey_id"] = event?.id;
-          local.fm.data["survey"] = event;
+          local.fm.data["survey_template_id"] = event?.id;
+          local.fm.data["survey_template"] = event;
           local.fm.render();
         }}
       />
@@ -454,7 +454,7 @@ export const ModalPageTemplateTask: FC<{
                             </ButtonBetter>
                           </div>
                         </div>
-                        {fm?.data?.survey ? (
+                        {fm?.data?.survey_template ? (
                           <>
                             <div className="flex flex-row">
                               <div className="flex flex-row  gap-x-2 items-center cursor-pointer border border-gray-200 shadow-md rounded-md mx-2 px-2 relative">
@@ -463,8 +463,8 @@ export const ModalPageTemplateTask: FC<{
                                   onClick={(event) => {
                                     event.preventDefault();
                                     event.stopPropagation();
-                                    fm.data.survey_id = null;
-                                    fm.data.survey = null;
+                                    fm.data.survey_template_id = null;
+                                    fm.data.survey_template = null;
                                     fm.render();
                                   }}
                                   className="absolute top-0 right-0 hover:bg-transparent"
@@ -480,7 +480,7 @@ export const ModalPageTemplateTask: FC<{
                                   />
                                 </div>
                                 <p className="text-lg md:text-xl font-bold">
-                                  {fm?.data?.survey?.name}
+                                  {fm?.data?.survey_template?.title}
                                 </p>
                               </div>
                             </div>

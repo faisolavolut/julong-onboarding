@@ -127,13 +127,14 @@ export const ModalPageAddSurvey: FC<{
                           />
                         </div>
                         <p className="text-lg md:text-xl font-bold">
-                          {item?.name}
+                          {item?.title}
                         </p>
                       </div>
                     </>
                   );
                 }}
                 onLoad={async (param: any) => {
+                  console.log({ param });
                   const params = await events(
                     "onload-param",
                     isStringEmpty(local.search)
@@ -143,19 +144,29 @@ export const ModalPageAddSurvey: FC<{
                           search: local.search,
                         }
                   );
+                  console.log({ params, param });
                   const result: any = await apix({
                     port: "onboarding",
-                    value: "data.data.events",
-                    path: `/api/events${params}`,
+                    value: "data.data.survey_templates",
+                    path: `/api/survey-templates${params}`,
                     validate: "array",
                   });
                   return result;
                 }}
                 onCount={async () => {
                   const param = {
-                    page: 1,
-                    page_size: 1,
+                    paging: 1,
+                    take: 1,
                   };
+                  console.log({ param });
+                  console.log(
+                    isStringEmpty(local.search)
+                      ? param
+                      : {
+                          ...param,
+                          search: local.search,
+                        }
+                  );
                   const params = await events(
                     "onload-param",
                     isStringEmpty(local.search)
@@ -165,10 +176,11 @@ export const ModalPageAddSurvey: FC<{
                           search: local.search,
                         }
                   );
+                  console.log({ params, param });
                   const result: any = await apix({
                     port: "onboarding",
                     value: "data.data.total",
-                    path: `/api/events${params}`,
+                    path: `/api/survey-templates${params}`,
                     validate: "object",
                   });
                   return getNumber(result);

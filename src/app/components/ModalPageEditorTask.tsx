@@ -26,6 +26,8 @@ import { actionToast } from "@/lib/utils/action";
 import { convertForm } from "@/lib/utils/convetForm";
 import { normalDate } from "@/lib/utils/date";
 import ImageBetter from "@/lib/components/ui/Image";
+import { ModalPageAddSurvey } from "./ModalPageAddSurvey";
+import { X } from "lucide-react";
 
 export const ModalPageEditorTask: FC<{
   open: boolean;
@@ -34,6 +36,7 @@ export const ModalPageEditorTask: FC<{
   onLoad?: () => Promise<any> | any;
 }> = ({ open, onChangeOpen, onSubmit, onLoad }) => {
   const [openEditorBackground, setOpenEditorBackground] = useState(false);
+  const [openSurvey, setOpenSurvey] = useState(false);
   const local = useLocal({
     tbl: null as any,
     open: false,
@@ -56,7 +59,18 @@ export const ModalPageEditorTask: FC<{
           local.fm.data["cover_path"] = event?.path_origin;
           local.fm.data["cover"] = event?.path;
           local.fm.render();
-          console.log(local.fm);
+        }}
+      />
+      <ModalPageAddSurvey
+        open={openSurvey}
+        onChangeOpen={(event) => {
+          setOpenSurvey(event);
+        }}
+        onChange={(event) => {
+          setOpenSurvey(false);
+          local.fm.data["survey_template_id"] = event?.id;
+          local.fm.data["survey_template"] = event;
+          local.fm.render();
         }}
       />
       <Dialog open={open}>
@@ -402,12 +416,52 @@ export const ModalPageEditorTask: FC<{
                             Survey
                           </div>
                           <div className="flex flex-row flex-grow items-center justify-end gap-x-2">
-                            <ButtonBetter>
+                            <ButtonBetter
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                setOpenSurvey(true);
+                              }}
+                            >
                               <HiPlus className="text-xl" />
                               Add
                             </ButtonBetter>
                           </div>
                         </div>
+                        {fm?.data?.survey_template ? (
+                          <>
+                            <div className="flex flex-row">
+                              <div className="flex flex-row  gap-x-2 items-center cursor-pointer border border-gray-200 shadow-md rounded-md mx-2 px-2 relative">
+                                <ButtonBetter
+                                  variant="clean"
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    fm.data.survey_template_id = null;
+                                    fm.data.survey_template = null;
+                                    fm.render();
+                                  }}
+                                  className="absolute top-0 right-0 hover:bg-transparent"
+                                >
+                                  <X className="text-xl" />
+                                </ButtonBetter>
+                                <div className="w-28 h-26 ml-4">
+                                  <ImageBetter
+                                    src={siteurl("/survey.png")}
+                                    alt="John Cena"
+                                    className=" w-full h-full object-cover object-right"
+                                    defaultSrc={siteurl("/404-img.jpg")}
+                                  />
+                                </div>
+                                <p className="text-lg md:text-xl font-bold">
+                                  {fm?.data?.survey_template?.title}
+                                </p>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                         <div
                           className={cx(
                             "w-full flex flex-row border-b border-gray-300 pb-1"
