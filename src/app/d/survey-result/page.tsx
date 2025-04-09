@@ -7,9 +7,10 @@ import { useLocal } from "@/lib/utils/use-local";
 import { useEffect } from "react";
 import { TableUI } from "@/lib/components/tablelist/TableUI";
 import { ButtonLink } from "@/lib/components/ui/button-link";
-import { HiOutlinePencilAlt, HiPlus } from "react-icons/hi";
 import get from "lodash.get";
 import { events } from "@/lib/utils/event";
+import { dayDate } from "@/lib/utils/date";
+import { IoEye } from "react-icons/io5";
 
 function Page() {
   const local = useLocal({
@@ -28,30 +29,33 @@ function Page() {
   }, []);
   return (
     <TableUI
-      title="Survey"
+      title="Survey Result"
       name="mpr"
       header={{
         sideLeft: (data: any) => {
-          // return <></>;
-
-          return (
-            <div className="flex flex-row flex-grow">
-              <ButtonLink className="bg-primary" href={"/d/survey/new"}>
-                <div className="flex items-center gap-x-0.5">
-                  <HiPlus className="text-xl" />
-                  <span className="capitalize">Add New</span>
-                </div>
-              </ButtonLink>
-            </div>
-          );
+          return <></>;
         },
       }}
       column={[
         {
-          name: "name",
-          header: "Name",
+          name: "survey_template.title",
+          header: "Title Survey",
           renderCell: ({ row, name }: any) => {
             return <>{getValue(row, name)}</>;
+          },
+        },
+        {
+          name: "employee_name",
+          header: "Employee",
+          renderCell: ({ row, name }: any) => {
+            return <>{getValue(row, name)}</>;
+          },
+        },
+        {
+          name: "date_submitted",
+          header: "Date Submitted",
+          renderCell: ({ row, name }: any) => {
+            return <>{dayDate(getValue(row, name))}</>;
           },
         },
         {
@@ -64,31 +68,12 @@ function Page() {
               <div className="flex items-center gap-x-0.5 whitespace-nowrap">
                 <ButtonLink
                   className="bg-primary"
-                  href={`/d/survey/${get(row, "id")}/edit`}
+                  href={`/d/survey-result/${get(row, "id")}/view`}
                 >
                   <div className="flex items-center gap-x-2">
-                    <HiOutlinePencilAlt className="text-lg" />
+                    <IoEye className="text-lg" />
                   </div>
                 </ButtonLink>
-                {/* {["ONGOING"].includes(get(row, "status")) && local?.can_edit ? (
-                  <ButtonLink
-                    className="bg-primary"
-                    href={`/d/survey/${get(row, "id")}/edit`}
-                  >
-                    <div className="flex items-center gap-x-2">
-                      <HiOutlinePencilAlt className="text-lg" />
-                    </div>
-                  </ButtonLink>
-                ) : (
-                  <ButtonLink
-                    className="bg-primary"
-                    href={`/d/survey/${get(row, "id")}/view`}
-                  >
-                    <div className="flex items-center gap-x-2">
-                      <IoEye className="text-lg" />
-                    </div>
-                  </ButtonLink>
-                )} */}
               </div>
             );
           },
@@ -98,8 +83,8 @@ function Page() {
         const params = await events("onload-param", param);
         const result: any = await apix({
           port: "onboarding",
-          value: "data.data.events",
-          path: `/api/events${params}`,
+          value: "data.data.survey_templates",
+          path: `/api/employee-tasks/employee-paginated${params}`,
           validate: "array",
         });
         return result;
@@ -108,7 +93,7 @@ function Page() {
         const result: any = await apix({
           port: "onboarding",
           value: "data.data.total",
-          path: `/api/events${param}`,
+          path: `/api/employee-tasks/employee-paginated${param}`,
           validate: "object",
         });
         return getNumber(result);

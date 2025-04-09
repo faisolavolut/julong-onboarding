@@ -32,4 +32,10 @@ export const configMenu = [
     href: "/d/survey",
     permision: ["read-survey"],
   },
+  {
+    title: "Survey Result",
+    icon: <MdOutlineTaskAlt />,
+    href: "/d/survey-result",
+    permision: ["read-survey"],
+  },
 ];

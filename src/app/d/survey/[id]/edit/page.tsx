@@ -182,7 +182,7 @@ function Page() {
       children={(fm: any) => {
         return (
           <>
-            <div className={"flex flex-col flex-wrap px-4 py-2"}>
+            <div className={"flex flex-col flex-wrap px-4 py-2 relative"}>
               <div className="grid gap-4 mb-4 md:gap-6 md:grid-cols-2 sm:mb-8">
                 <div>
                   <Field
@@ -196,7 +196,7 @@ function Page() {
               </div>
               <div
                 className={cx(
-                  "w-full flex flex-row border-b border-gray-300 pb-1"
+                  "w-full flex flex-row border-b border-gray-300 py-1 sticky top-0 bg-white z-10"
                 )}
               >
                 <div className="flex flex-row items-center gap-x-2 font-bold text-md">
