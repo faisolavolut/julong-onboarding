@@ -237,7 +237,7 @@ export const ModalPageTask: FC<{
                                         "Are you sure you want to save this task?"
                                       }
                                       onClick={async () => {
-                                        fm?.data.kanban = "NEED_REVIEW";
+                                        fm.data.kanban = "NEED_REVIEW";
                                         fm.render();
                                         await fm.submit();
                                         if (typeof refresh === "function")
