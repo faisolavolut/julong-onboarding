@@ -129,7 +129,7 @@ function Page() {
         const params = await events("onload-param", param);
         const result: any = await apix({
           port: "onboarding",
-          value: "data.data.survey_templates",
+          value: "data.data.employee_tasks",
           path: `/api/employee-tasks/survey${params}`,
           validate: "array",
         });
