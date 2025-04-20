@@ -234,6 +234,21 @@ export const ModalPageTask: FC<{
                                     <Alert
                                       type={"save"}
                                       msg={
+                                        "Are you sure you want to save this task?"
+                                      }
+                                      onClick={async () => {
+                                        fm.render();
+                                        await fm.submit();
+                                        if (typeof refresh === "function")
+                                          refresh();
+                                        onChangeOpen(false);
+                                      }}
+                                    >
+                                      <ButtonContainer>Save</ButtonContainer>
+                                    </Alert>
+                                    <Alert
+                                      type={"save"}
+                                      msg={
                                         "Are you sure you want to revise this task?"
                                       }
                                       onClick={async () => {
