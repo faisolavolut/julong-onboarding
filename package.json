@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build --no-lint",
-    "start": "next start",
-    "prod": "next start -H 0.0.0.0",
+    "start": "node server.js",
+    "prod": "node server.js",
     "lint": "next lint"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
     "embla-carousel-react": "^8.5.1",
     "flowbite": "^2.5.2",
     "flowbite-react": "^0.10.2",
+    "https": "^1.0.0",
     "js-cookie": "^3.0.5",
     "julong-flowbite": "file:",
     "lodash.get": "^4.4.2",
